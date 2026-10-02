@@ -1,4 +1,4 @@
-/** 与后端契约对齐的共享类型 + 宽松的载荷归一化（后端字段做防御性兼容）。 */
+﻿/** 与后端契约对齐的共享类型 + 宽松的载荷归一化（后端字段做防御性兼容）�?*/
 
 export interface User {
   id: string;
@@ -11,6 +11,8 @@ export interface RoomPlayer {
   username: string;
   avatarId?: number | string;
   score: number;
+  /** 本回合是否已猜中（后�?publicPlayer.guessed�?*/
+  guessed?: boolean;
 }
 
 export interface RoomState {
@@ -20,6 +22,13 @@ export interface RoomState {
   status?: string;
   roundNo?: number;
   totalRounds?: number;
+  /** 本回合已产生的笔迹（随快照下发，用于中途加�?刷新回放�?*/
+  strokes: StrokeEvent[];
+  drawerId?: string;
+  /** 仅画者可�?*/
+  word?: string;
+  charCount?: number;
+  endsAt?: number;
 }
 
 export interface StrokeEvent {
@@ -42,11 +51,14 @@ export interface RoundInfo {
 export interface RoundScore {
   playerId: string;
   gained: number;
+  username?: string;
+  total?: number;
 }
 
 export interface ResultRow {
   playerId?: string;
   username: string;
+  avatarId?: number | string;
   score: number;
   rank: number;
 }
@@ -62,7 +74,7 @@ export interface ChatMsg {
 type Any = Record<string, any>;
 
 let seq = 0;
-const nextId = () => ++seq;
+export const nextMsgId = () => ++seq;
 
 function asObj(raw: unknown): Any {
   return raw && typeof raw === 'object' ? (raw as Any) : {};
@@ -98,6 +110,7 @@ export function normalizePlayers(raw: unknown): RoomPlayer[] {
       username: String(o.username ?? o.name ?? o.player?.username ?? `玩家${i + 1}`),
       avatarId: o.avatarId ?? o.avatar ?? o.player?.avatarId,
       score: Number(o.score ?? o.points ?? o.total ?? 0) || 0,
+      guessed: o.guessed === true,
     };
   });
 }
@@ -105,6 +118,14 @@ export function normalizePlayers(raw: unknown): RoomPlayer[] {
 export function normalizeRoomState(raw: unknown): RoomState {
   const root = asObj(raw);
   const o = asObj(root.room ?? root.state ?? root);
+  const strokesRaw = o.strokes ?? root.strokes;
+  const strokes: StrokeEvent[] = Array.isArray(strokesRaw)
+    ? strokesRaw
+        .map((s) => normalizeStroke(s))
+        .filter((s): s is StrokeEvent => s !== null)
+    : [];
+  const charCountRaw = o.charCount ?? root.charCount;
+  const endsAt = toEpochMs(o.endsAt ?? root.endsAt);
   return {
     code: typeof o.code === 'string' ? o.code : undefined,
     hostId: idOf(o.ownerId) ?? idOf(o.hostId) ?? idOf(o.owner) ?? idOf(root.ownerId) ?? idOf(root.hostId),
@@ -112,6 +133,11 @@ export function normalizeRoomState(raw: unknown): RoomState {
     status: typeof o.status === 'string' ? o.status : typeof o.phase === 'string' ? o.phase : undefined,
     roundNo: Number(o.roundNo ?? o.round ?? root.roundNo) || undefined,
     totalRounds: Number(o.totalRounds ?? o.rounds ?? root.totalRounds) || undefined,
+    strokes,
+    drawerId: idOf(o.drawerId) ?? idOf(root.drawerId) ?? undefined,
+    word: typeof o.word === 'string' && o.word ? o.word : undefined,
+    charCount: typeof charCountRaw === 'number' && Number.isFinite(charCountRaw) ? charCountRaw : undefined,
+    endsAt: endsAt ?? undefined,
   };
 }
 
@@ -154,6 +180,8 @@ export function normalizeScores(raw: unknown): RoundScore[] {
       return {
         playerId: idOf(o) ?? idOf(o.player) ?? '',
         gained: Number(o.gained ?? o.score ?? o.points ?? 0) || 0,
+        username: typeof o.username === 'string' ? o.username : undefined,
+        total: Number.isFinite(Number(o.total)) ? Number(o.total) : undefined,
       };
     });
   }
@@ -182,6 +210,7 @@ export function normalizeResults(raw: unknown): ResultRow[] {
     return {
       playerId: idOf(o),
       username: String(o.username ?? o.name ?? `玩家${i + 1}`),
+      avatarId: o.avatarId ?? o.avatar,
       score: Number(o.score ?? o.totalScore ?? o.total ?? o.points ?? 0) || 0,
       rank: Number(o.rank ?? o.position ?? 0) || 0,
     };
@@ -203,20 +232,22 @@ export function normalizeTimer(raw: unknown): number | null {
 
 export function normalizeChat(raw: unknown): ChatMsg | null {
   if (typeof raw === 'string') {
-    return raw ? { id: nextId(), kind: 'system', text: raw } : null;
+    return raw ? { id: nextMsgId(), kind: 'system', text: raw } : null;
   }
   const o = asObj(raw);
   const text = String(o.text ?? o.message ?? o.content ?? '').trim();
   if (!text) return null;
   const playerId = idOf(o.playerId) ?? idOf(o.userId) ?? idOf(o.player);
   const username = typeof o.username === 'string' ? o.username : typeof o.name === 'string' ? o.name : undefined;
+  // 后端系统行：playerId 字段存在且为 null
   const system =
+    ('playerId' in o && o.playerId == null) ||
     o.system === true ||
     o.type === 'system' ||
     o.kind === 'system' ||
     (!playerId && !username);
   return {
-    id: nextId(),
+    id: nextMsgId(),
     kind: system ? 'system' : 'player',
     playerId,
     username,

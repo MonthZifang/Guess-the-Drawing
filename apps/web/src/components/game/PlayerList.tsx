@@ -56,6 +56,9 @@ export function PlayerList({ players, hostId, drawerId, myId }: Props) {
                 {isDrawer && (
                   <div className="text-[11px] font-bold text-sakura">★ 当前画者</div>
                 )}
+                {!isDrawer && p.guessed && !!drawerId && (
+                  <div className="text-[11px] font-bold text-mint">✓ 已猜中</div>
+                )}
               </div>
               <span className="shrink-0 rounded-full bg-white px-2 py-0.5 font-display text-sm text-stella shadow-sm">
                 {p.score}

@@ -21,6 +21,7 @@ import {
   normalizeScores,
   normalizeStroke,
   normalizeTimer,
+  nextMsgId,
 } from '../lib/types';
 import type { ChatMsg, ResultRow, RoomPlayer, RoomState, RoundInfo, RoundScore, StrokeEvent } from '../lib/types';
 
@@ -37,7 +38,6 @@ const PALETTE = [
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
-let msgSeq = 0;
 let burstSeq = 0;
 
 interface EchoEntry {
@@ -94,6 +94,7 @@ export default function Room() {
   const userRef = useRef(user);
   const echoesRef = useRef<EchoEntry[]>([]);
   const phaseRef = useRef<Phase>('waiting');
+  const roundKeyRef = useRef('');
 
   playersRef.current = roomState?.players ?? [];
   userRef.current = user;
@@ -120,12 +121,55 @@ export default function Room() {
     return p?.username ?? '玩家';
   }, []);
 
-  const addSystemLine = useCallback((text: string) => {
-    setMessages((prev) => [...prev, { id: ++msgSeq, kind: 'system', text }]);
-  }, []);
-
   const removeBurst = useCallback((id: number) => {
     setBursts((list) => list.filter((b) => b !== id));
+  }, []);
+
+  /**
+   * 应用完整房间快照（socket room:state 与 REST /rooms/:code 共用）：
+   * 更新玩家 → 回放快照笔迹（后端无单独 replay 事件）→ 恢复当前回合/对局状态。
+   */
+  const applyState = useCallback((raw: unknown) => {
+    const st = normalizeRoomState(raw);
+    setRoomState((prev) =>
+      prev
+        ? {
+            ...prev,
+            ...st,
+            players: st.players.length > 0 ? st.players : prev.players,
+            hostId: st.hostId ?? prev.hostId,
+            totalRounds: st.totalRounds ?? prev.totalRounds,
+          }
+        : st,
+    );
+    if (st.totalRounds) setTotalRounds(st.totalRounds);
+
+    const board = boardRef.current;
+    if (board) {
+      board.clear();
+      for (const s of st.strokes) board.applyStroke(s);
+    }
+
+    if (st.status === 'finished') {
+      roundKeyRef.current = '';
+      setPhase('gameEnd');
+      setRemaining(null);
+      return;
+    }
+    if (st.drawerId && st.status === 'playing') {
+      roundKeyRef.current = `${st.roundNo ?? 0}:${st.drawerId}`;
+      setRound({
+        roundNo: st.roundNo ?? 0,
+        drawerId: st.drawerId,
+        word: st.word,
+        charCount: st.charCount ?? 0,
+        endsAt: st.endsAt,
+      });
+      setPhase('playing');
+      setRemaining(st.endsAt ? Math.max(0, Math.round((st.endsAt - Date.now()) / 1000)) : null);
+    } else if (st.status === 'playing') {
+      setPhase((p) => (p === 'waiting' ? 'playing' : p));
+    }
   }, []);
 
   /* ---------- 连接 /game 空间（握手带 JWT） ---------- */
@@ -142,24 +186,7 @@ export default function Room() {
     const onConnectError = (err: Error) => push(`连接失败：${err.message}`);
     const onError = (data: unknown) => push(errorMessage(data));
 
-    const onState = (data: unknown) => {
-      const st = normalizeRoomState(data);
-      setRoomState((prev) =>
-        prev
-          ? {
-              ...prev,
-              ...st,
-              players: st.players.length > 0 ? st.players : prev.players,
-              hostId: st.hostId ?? prev.hostId,
-              totalRounds: st.totalRounds ?? prev.totalRounds,
-            }
-          : st,
-      );
-      if (st.totalRounds) setTotalRounds(st.totalRounds);
-      if (st.status === 'playing' || st.status === 'in_progress') {
-        setPhase((p) => (p === 'waiting' ? 'playing' : p));
-      }
-    };
+    const onState = (data: unknown) => applyState(data);
 
     const onPlayerJoined = (data: unknown) => {
       const o = (data ?? {}) as Record<string, any>;
@@ -182,24 +209,32 @@ export default function Room() {
         setRoomState((prev) => (prev ? { ...prev, players: normalizeRoomState({ players: o.players }).players } : prev));
         return;
       }
+      // 后端 player:left = { userId, username, reason }
       const id =
-        typeof o.playerId === 'string'
-          ? o.playerId
-          : typeof o.id === 'string'
-            ? o.id
-            : typeof (o.player as Record<string, any> | undefined)?.id === 'string'
-              ? (o.player as Record<string, any>).id
-              : '';
+        typeof o.userId === 'string'
+          ? o.userId
+          : typeof o.playerId === 'string'
+            ? o.playerId
+            : typeof o.id === 'string'
+              ? o.id
+              : typeof (o.player as Record<string, any> | undefined)?.id === 'string'
+                ? (o.player as Record<string, any>).id
+                : '';
       if (!id) return;
-      setRoomState((prev) =>
-        prev ? { ...prev, players: prev.players.filter((p) => p.id !== id) } : prev,
-      );
+      setRoomState((prev) => {
+        if (!prev) return prev;
+        const players = prev.players.filter((p) => p.id !== id);
+        // 房主离开时服务端转移给 players[0]，前端同步推断
+        const hostId = prev.hostId === id ? players[0]?.id : prev.hostId;
+        return { ...prev, players, hostId };
+      });
     };
 
     const onGameStarted = (data: unknown) => {
       const o = (data ?? {}) as Record<string, any>;
       const n = Number(o.totalRounds ?? o.rounds);
       if (Number.isFinite(n) && n > 0) setTotalRounds(n);
+      roundKeyRef.current = '';
       setRound(null);
       setRoundScores([]);
       setResults([]);
@@ -209,6 +244,12 @@ export default function Room() {
 
     const onRoundStart = (data: unknown) => {
       const info = normalizeRoundStart(data);
+      const key = `${info.roundNo}:${info.drawerId}`;
+      if (key !== roundKeyRef.current) {
+        // 新回合：服务端仅清 strokes 数组不广播清空事件，前端在换回合时清画布
+        roundKeyRef.current = key;
+        boardRef.current?.clear();
+      }
       setRound(info);
       setPhase('playing');
       setRoundScores([]);
@@ -225,10 +266,22 @@ export default function Room() {
     const onCleared = () => boardRef.current?.clear();
 
     const onGuessCorrect = (data: unknown) => {
+      // 文字提示由后端 systemChat 广播（chat 系统行），此处：花瓣 + 分数乐观更新
       const o = (data ?? {}) as Record<string, any>;
-      const playerId = String(o.playerId ?? o.userId ?? '');
-      const gained = Number(o.gained ?? o.score ?? 0) || 0;
-      addSystemLine(`🎉 ${nameOf(playerId)} 猜中了！+${gained} 分`);
+      const playerId = typeof o.playerId === 'string' ? o.playerId : '';
+      const gained = Number(o.gained ?? 0) || 0;
+      if (playerId && gained > 0) {
+        setRoomState((prev) =>
+          prev
+            ? {
+                ...prev,
+                players: prev.players.map((p) =>
+                  p.id === playerId ? { ...p, score: p.score + gained } : p,
+                ),
+              }
+            : prev,
+        );
+      }
       const id = ++burstSeq;
       setBursts((list) => [...list, id]);
     };
@@ -251,8 +304,23 @@ export default function Room() {
 
     const onRoundEnd = (data: unknown) => {
       const o = (data ?? {}) as Record<string, any>;
-      setRoundScores(normalizeScores(o.scores ?? data));
+      const scores = normalizeScores(o.scores ?? data);
+      setRoundScores(scores);
       setLastWord(typeof o.word === 'string' ? o.word : '');
+      // 回合结束公布 total → 精确刷新玩家列表分数（画者抽成等服务端已计入）
+      const totals = new Map(scores.filter((s) => s.total != null).map((s) => [s.playerId, s.total as number]));
+      if (totals.size > 0) {
+        setRoomState((prev) =>
+          prev
+            ? {
+                ...prev,
+                players: prev.players.map((p) =>
+                  totals.has(p.id) ? { ...p, score: totals.get(p.id) ?? p.score } : p,
+                ),
+              }
+            : prev,
+        );
+      }
       setPhase('roundEnd');
       setRemaining(null);
     };
@@ -292,21 +360,15 @@ export default function Room() {
       socketRef.current = null;
       setConnected(false);
     };
-  }, [token, code, push, addSystemLine, nameOf]);
+  }, [token, code, push, applyState]);
 
-  /* ---------- 房间快照（刷新恢复，尽力而为） ---------- */
+  /* ---------- 房间快照（刷新恢复，尽力而为；与 socket room:state 幂等） ---------- */
   useEffect(() => {
     if (!code) return;
     let alive = true;
     api<unknown>(`/rooms/${encodeURIComponent(code)}`)
       .then((data) => {
-        if (!alive) return;
-        const st = normalizeRoomState(data);
-        if (st.players.length > 0 || st.hostId) {
-          setRoomState((prev) => prev ?? st);
-          if (st.totalRounds) setTotalRounds(st.totalRounds);
-          if (st.status === 'playing' || st.status === 'in_progress') setPhase('playing');
-        }
+        if (alive) applyState(data);
       })
       .catch(() => {
         /* 快照非必需，socket 会兜底 */
@@ -314,7 +376,7 @@ export default function Room() {
     return () => {
       alive = false;
     };
-  }, [code]);
+  }, [code, applyState]);
 
   /* ---------- 倒计时（timer 事件驱动，事件间隙本地递减） ---------- */
   useEffect(() => {
@@ -354,7 +416,7 @@ export default function Room() {
       setMessages((prev) => [
         ...prev,
         {
-          id: ++msgSeq,
+          id: nextMsgId(),
           kind: 'player',
           playerId: myIdRef.current,
           username: userRef.current?.username ?? '我',
@@ -484,8 +546,15 @@ export default function Room() {
                         key={`${s.playerId}-${i}`}
                         className="flex items-center justify-between rounded-xl bg-bg px-3 py-1.5 text-sm"
                       >
-                        <span className="truncate font-semibold">{nameOf(s.playerId)}</span>
-                        <span className="font-display text-mint">+{s.gained}</span>
+                        <span className="truncate font-semibold">
+                          {s.username ?? nameOf(s.playerId)}
+                        </span>
+                        <span className="shrink-0">
+                          <span className="font-display text-mint">+{s.gained}</span>
+                          {s.total != null && (
+                            <span className="ml-2 text-xs text-ink/40">总 {s.total}</span>
+                          )}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -563,7 +632,7 @@ export default function Room() {
                   <span className="w-8 text-center text-xl">
                     {MEDALS[r.rank - 1] ?? `#${r.rank}`}
                   </span>
-                  <Avatar user={{ username: r.username, avatarId: r.playerId }} size={34} />
+                  <Avatar user={{ username: r.username, avatarId: r.avatarId }} size={34} />
                   <span className="min-w-0 flex-1 truncate font-semibold">{r.username}</span>
                   <span className="font-display text-lg text-stella">{r.score} 分</span>
                 </li>
