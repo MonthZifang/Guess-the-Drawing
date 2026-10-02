@@ -1,0 +1,2252 @@
+[
+  {
+    "text": "差扰",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "悬崖",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "砂岩块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "玄武岩块",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "草地",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "矿渣液",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "太空",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "盐碱地",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "盐墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "鹅卵石",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "卷须",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "沙墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "孢子树",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "孢子墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "石块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "雪岩块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "雪树",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "页岩地",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "页岩块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "苔藓地",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "灌木丛",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "孢子苔藓地",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "页岩墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "废墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型废墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "巨型废墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "超巨型废墙",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "推进器残骸",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "窑炉",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "石墨压缩机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "多重压缩机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "敌人出生点",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "移除墙体",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "移除矿",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "初代核心",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "次代核心",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "终代核心",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "深水",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "污水",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "深污水",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "黑沙污水",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "石头",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "沙子",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "黑沙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "陨石坑",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "浅滩",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "黑沙浅滩",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "焦土",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "安山岩",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "流纹岩",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "安山岩墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "安山岩块",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "冰雪地",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "石墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "冰墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "雪墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "沙丘岩",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "松树",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "泥土",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "泥土墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "泥巴",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "枯萎的白树",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "白树",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "孢子簇",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "损坏的金属地板",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "染色地板",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "染色墙壁",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "标识贴片",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "符文贴片",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "暗金属",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "玄武岩",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "灼热岩石",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "熔融岩石",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "铜墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型铜墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "钛墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型钛墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "塑钢墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型塑钢墙",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "相织布墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "大型相织布墙",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "钍墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型钍墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "大门",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "双管",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "火焰",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "分裂",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "冰雹",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "蓝瑟",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "传送带",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "钛传送带",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "塑钢传送带",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "装甲传送带",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "交叉器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "路由器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "分配器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "分类器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "反向分类器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "信息板",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "强化信息板",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "世界信息板",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "世界开关",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "照明器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "溢流门",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "反向溢流门",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "硅冶炼厂",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "相织布编织器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "粉碎机",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "冷冻液混合器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "熔炉",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "焚化炉",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "孢子压缩机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "分离机",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "煤炭离心机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "电力节点",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "大型电力节点",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "巨浪电力塔",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "二极管",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "电池",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型电池",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "火力发电机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "涡轮发电机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "温差发电机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "冲击反应堆",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "机械钻头",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "气动钻头",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "激光钻头",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "抽水机",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "培养机",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "导管",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "机械泵",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "物品源",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "物品黑洞",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "液体源",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "液体黑洞",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "电力黑洞",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "电力源",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "装卸器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "仓库",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "波浪",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "海啸",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "蜂群",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "齐射",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "浪涌",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "相织布传送带桥",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "传送带桥",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "塑钢压缩机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "硫化物混合器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "爆炸物混合器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "太阳能板",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "大型太阳能板",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "石油钻井",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "维修点",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "维修塔",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "脉冲导管",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "电镀导管",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "相织布导管桥",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "流体路由器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "流体储罐",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "流体容器",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "流体交叉器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "导管桥",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "回转泵",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "钍反应堆",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "质量驱动器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "爆破钻头",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "脉冲泵",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "热能发电机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "合金冶炼厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "修理器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "修理投影",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "合金墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型合金墙",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "气旋",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "雷光",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "脉冲地雷",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "超速投影",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "力墙投影",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "电弧",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "幽灵",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "熔毁",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "厄兆",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "容器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "发射台",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "接收台",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "裂解",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "陆军工厂",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "空军工厂",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "海军工厂",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "载荷传送带",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "载荷路由器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "物品管道",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "物品管道路由器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "物品管道桥",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "载荷黑洞",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "载荷源",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "解离机",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "热能坩埚",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "超速穹顶",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "行星际加速器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "构筑器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型构筑器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "大型解构器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "载荷装载器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "载荷卸载器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "热量源",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "流纹岩坑",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "粗糙流纹岩",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "风化岩",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "黄石",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "碳石",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "铁石",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "铁陨石坑",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "铍石",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "晶石",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "晶石地板",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "黄石地板",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "红石",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "高密红石",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "红冰",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "芳石",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "流纹石喷口",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "碳石喷口",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "芳石喷口",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "黄石喷口",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "红石喷口",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "晶石喷口",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "岩石喷口",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "玄武岩喷口",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "红地垫",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "蓝地垫",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "核心区",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "风化墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "黄石墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "流纹岩墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "碳石墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "铁石墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "铍石墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "芳石墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "晶石墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "红冰墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "红石墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "红钻墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "赤藻",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "紫灌木丛",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "黄珊瑚",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "碳石块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "铁石块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "铍石块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "黄石块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "芳石块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "水晶簇",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "鲜艳水晶簇",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "风化晶体",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "晶石球",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "晶石块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "红冰石块",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "流纹石块",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "红石块",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "石墨墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "电弧硅炉",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "电解机",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大气收集器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "氧化室",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "电制热机",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "矿渣制热机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "相织制热机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "热量传输机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "小型热量传输机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "热量路由器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "矿渣焚化炉",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "碳化物坩埚",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "矿渣离心机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "合金坩埚",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "氰合成机",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "相织布合成机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "热量反应堆",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "铍墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型铍墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "钨墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型钨墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "防爆闸门",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "碳化物墙",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "大型碳化物墙",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "强化合金墙",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "大型强化合金墙",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "盾墙",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "雷达",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "建造塔",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "再生投影器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "震爆塔",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "护盾投影器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "大型护盾投影器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "装甲管道",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "溢流管道",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "反向溢流管",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "管道装卸器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "合金传送带",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "合金路由器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "单位物流装载器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "单位物流卸载点",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "强化泵",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "强化导管",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "强化流体交叉器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "强化流体带桥",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "强化流体路由器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "强化流体容器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "强化流体储罐",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "激光节点",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "激光塔",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "激光连接器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "涡轮冷凝器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "化学燃烧室",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "热解发生器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "排气冷凝器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "墙壁粉碎机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "高级墙壁粉碎机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "等离子钻机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "高级等离子钻机",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "冲击钻头",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "爆裂钻头",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "城堡核心",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "堡垒核心",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "卫城核心",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "强化容器",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "强化仓库",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "撕裂",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "升华",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "泰坦",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "驱离",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "劫难",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "光辉",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "创伤",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "坦克重构厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "机甲重构厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "飞船重构厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "坦克组装厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "飞船组装厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "机甲组装厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "强化载荷传送带",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "强化载荷路由器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "载荷质量驱动器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "解构器",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "画板",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "大型画板",
+    "category": "BUILDING",
+    "difficulty": 2
+  },
+  {
+    "text": "世界处理器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "世界内存元",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "坦克制造厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "机甲制造厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "飞船制造厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "高级再重构工厂",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "单位维修塔",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "扩散",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "基本装配厂模块",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "天谴",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "魔灵",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "通量反应堆",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "瘤变反应堆",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "开关",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "微型处理器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "逻辑处理器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "超核处理器",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "逻辑显示屏",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "大型逻辑显示屏",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "逻辑显示单元",
+    "category": "BUILDING",
+    "difficulty": 3
+  },
+  {
+    "text": "内存元",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "内存库",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "标靶",
+    "category": "BUILDING",
+    "difficulty": 1
+  },
+  {
+    "text": "尖刀",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "战锤",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "堡垒",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "新星",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "恒星",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "耀星",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "爬虫",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "毒蛛",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "血蛭",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "毒蛊",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "天蝎",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "星辉",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "天垠",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "苍穹",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "月影",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "日蚀",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "独影",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "幻型",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "巨像",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "雷霆",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "要塞",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "梭鱼",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "飞鲨",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "戟鲸",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "蛟龙",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "海神",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "潜螺",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "电鳗",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "江豚",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "玄武",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "龙王",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "阿尔法",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "贝塔",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "伽马",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "权杖",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "王座",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "灾星",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "死星",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "围护",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "循迹",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "准绳",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "征服",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "领主",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "天守",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "天赐",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "天灾",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "天理",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "天帝",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "挣脱",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "遮蔽",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "消散",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "遏止",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "悲怆",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "苏醒",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "策动",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "发散",
+    "category": "UNIT",
+    "difficulty": 1
+  },
+  {
+    "text": "货运无人机",
+    "category": "UNIT",
+    "difficulty": 3
+  },
+  {
+    "text": "装配无人机",
+    "category": "UNIT",
+    "difficulty": 3
+  },
+  {
+    "text": "矿渣",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "石油",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "冷冻液",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "瘤液",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "芳油",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "镓液",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "臭氧",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "氢气",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "氮气",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "氰气",
+    "category": "LIQUID",
+    "difficulty": 1
+  },
+  {
+    "text": "煤炭",
+    "category": "ITEM",
+    "difficulty": 1
+  },
+  {
+    "text": "石墨",
+    "category": "ITEM",
+    "difficulty": 1
+  },
+  {
+    "text": "塑钢",
+    "category": "ITEM",
+    "difficulty": 1
+  },
+  {
+    "text": "相织布",
+    "category": "ITEM",
+    "difficulty": 1
+  },
+  {
+    "text": "巨浪合金",
+    "category": "ITEM",
+    "difficulty": 2
+  },
+  {
+    "text": "孢子荚",
+    "category": "ITEM",
+    "difficulty": 1
+  },
+  {
+    "text": "爆炸混合物",
+    "category": "ITEM",
+    "difficulty": 3
+  },
+  {
+    "text": "硫化物",
+    "category": "ITEM",
+    "difficulty": 1
+  },
+  {
+    "text": "钢化玻璃",
+    "category": "ITEM",
+    "difficulty": 2
+  },
+  {
+    "text": "废料",
+    "category": "ITEM",
+    "difficulty": 1
+  },
+  {
+    "text": "裂变产物",
+    "category": "ITEM",
+    "difficulty": 2
+  },
+  {
+    "text": "氧化物",
+    "category": "ITEM",
+    "difficulty": 1
+  },
+  {
+    "text": "碳化物",
+    "category": "ITEM",
+    "difficulty": 1
+  },
+  {
+    "text": "休眠囊肿",
+    "category": "ITEM",
+    "difficulty": 2
+  }
+]

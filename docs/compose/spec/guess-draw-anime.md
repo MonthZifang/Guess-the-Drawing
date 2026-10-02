@@ -31,7 +31,7 @@ commits:
 - 字体：标题站酷快乐体（ZCOOL KuaiLe，回退 PingFang SC / Microsoft YaHei），正文系统无衬线；圆角卡片（rx≥12px）、8px 间距节奏
 - 布局：居中 max-w-6xl 三栏对局页——左玩家列表 / 中画板 / 右聊天猜词
 - 标志性瞬间：① 画笔带樱花样式的粒子尾迹；② 回合开始时二次元角色立绘卡翻转揭示题目（仅画者看到词）；③ 猜对时彩带/花瓣飘落
-- 图像资源：用 image_gen 生成预设二次元头像若干、标题横幅、回合揭示用立绘卡；用户从预设头像中选择，不支持上传
+- 图像资源：image_gen 服务不可用（会员 403，2026-02 确认）→ 预设头像改为**手绘 SVG**（6 个 Q 版二次元头像放 `apps/web/public/avatars/*.svg`）；标题横幅与回合立绘卡用纯 CSS/SVG 自绘；用户从预设头像中选择，不支持上传
 
 ### 词库生成
 
@@ -62,7 +62,7 @@ commits:
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
-| POST | `/auth/register` | `{username, password}` → `{accessToken, user}` |
+| POST | `/auth/register` | `{username, password, avatarId?}` → `{accessToken, user}`（avatarId 默认 1，取值 1–6） |
 | POST | `/auth/login` | 同上 |
 | GET | `/users/me` | 当前用户 |
 | POST | `/rooms` | 创建房间 → `{code, ...}` |
@@ -83,7 +83,7 @@ commits:
 仓储接口 `UserStore / WordStore / MatchStore`，由 NestJS DI 按环境注入：
 
 - **内存模式（当前阶段）**：`DATABASE_URL` 未配置 → 进程内 Map 实现；`words.json` 启动时加载；用户与对局仅存内存，重启清空（多人对局在同一实例内，不受影响）
-- **Postgres 模式（远程库就绪后）**：配置 `DATABASE_URL` → 同一接口的 Prisma 实现；`prisma migrate` + 种子脚本一次性建立表与词库
+- **Postgres 模式（远程库就绪后）**：配置 `DATABASE_URL` → 届时补入同一接口的 Prisma 实现并执行 `prisma migrate` + 种子；本期交付仓储接口、内存实现与 schema 文件（不写未验证的数据库代码）
 - Prisma schema（`User/Match/MatchPlayer/Word`）随代码提交，第一期不执行 migrate
 - 实体形状：`User(id, username 唯一, passwordHash, avatarId, createdAt)`、`Match(id, roomCode, rounds, endedAt)` + `MatchPlayer(matchId, userId, score, rank)`、`Word(id, text 唯一, category, difficulty)`
 - 认证与存储无关：bcrypt 密码哈希、JWT access token（7 天），两种模式一致
