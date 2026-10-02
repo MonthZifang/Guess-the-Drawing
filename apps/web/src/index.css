@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #f6f4ff;
+  --color-ink: #2e2645;
+  --color-sakura: #ff6fa5;
+  --color-stella: #7b6cf6;
+  --color-mint: #3ecfa0;
+  --font-display: "ZCOOL KuaiLe", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-sans: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}

@@ -1,0 +1,13 @@
+{
+  "name": "guess-draw-anime",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w apps/server && npm run build -w apps/web",
+    "test": "npm test -w apps/server",
+    "dev:server": "npm run dev -w apps/server",
+    "dev:web": "npm run dev -w apps/web"
+  }
+}
