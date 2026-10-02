@@ -1,14 +1,20 @@
 ---
 feature: guess-draw-anime
-status: in-progress
-updated: 2026-02-14
+status: delivered
+updated: 2026-10-03
 branch: feature/guess-draw-anime
-commits:
+commits: a6db8a0..d415b72
 ---
 
 # 你猜我画·二次元（Mindustry 词库）
 
 ## Report
+
+**What was built** — 完整可玩的多人实时「你猜我画」：npm workspaces 单仓库，NestJS + Socket.IO 后端（JWT 认证、房间、6 回合×80 秒对局、计分、对局历史与 Top10 排行）与 React 18 + Vite + Tailwind 二次元前端（三栏对局页、画板实时同步、聊天猜词、揭示卡/粒子尾迹/花瓣三处标志性瞬间、6 选 1 SVG 头像）。词库从 Mindustry zh_CN 语言包提取，严格 2–6 字过滤，共 432 词（BUILDING 350 / UNIT 58 / LIQUID 10 / ITEM 14）。数据层为双模式仓储接口：当前内存模式（用户批准），Prisma schema 已提交，远程 PostgreSQL 连接串就绪后接入即切。经两轮独立评审：首轮 CHANGES_REQUESTED（3 critical），修复 category 下发、断线保留（刷新不丢分）、词库长度污染后复审 APPROVE。
+
+**Verification** — `npm run build` exit 0（web+server）；`npm test -w apps/server` 50/50 全绿（含 auth/rooms/matches e2e、scoring/word-rules 单测）；`node scripts/smoke-game.mjs` 28 项 SMOKE OK（含画者收词+类别、断线系统提示、双角色重连后玩家/分数/词重发）；词库提取两次 SHA256 一致；双浏览器真实走查：注册→建房→加入→6 回合整场对局→结算→历史/排行，效果数值取证（粒子层 2323 非透明像素、猜中 .gd-petal×22、计分 +10/+2 与公式吻合）。
+
+**Journey log** — ① image_gen 会员 403 → 头像/横幅改手绘 SVG+CSS（规格修订）。② 前后端并行子代理实现，以规格 Socket/REST 契约 + 服务端真实负载转发对齐。③ playwright 后台页截图反复拿到旧帧 → 改用页内数值取证（canvas 像素计数、DOM 元素计数）作为效果证据。④ 首轮评审 3 critical → 断线保留采用「显式 room:leave 才移除、断线仅置离线」的前后端分界（leaveIntentRef）。⑤ LIQUID/ITEM 在源包仅 11/22 条名称，词数以源上限交付并写入规格。
 
 ## [S1] Problem
 
@@ -107,12 +113,12 @@ commits:
 
 ## Tasks
 
-- [ ] T1: monorepo 脚手架 — acceptance: `apps/web`（Vite+React+TS+Tailwind）与 `apps/server`（NestJS+Prisma）在 npm workspaces 下安装成功，`npm run build -w apps/web`、`npm run build -w apps/server` 均通过 (covers: S2 技术栈)
-- [ ] T2: 词库提取与存储仓储 — acceptance: 提取脚本从 Mindustry 中文包生成 `words.json`（BUILDING/UNIT 各 ≥40，LIQUID/ITEM 按源数据上限全量保留，2–6 字过滤），过滤/分类单测通过；仓储接口 + 内存实现完成，启动即加载词库；Prisma schema 已提交（migrate 留待远程库就绪）(covers: S2 词库生成/数据存储; depends: T1)
-- [ ] T3: 认证模块 — acceptance: register/login/users-me 三个接口 e2e 通过（含重复用户名、错误密码、401 无 token 用例），JWT 签发与 bcrypt 校验生效（跑在内存仓储上）(covers: S2 REST/数据存储; depends: T2)
-- [ ] T4: 房间与对局后端 — acceptance: 房间 REST（创建/快照）e2e 通过；计分纯函数单测通过；Socket 网关实现 join/笔迹转发/猜词判定/回合计时/计分入库全链路，`npm test -w apps/server` 全绿 (covers: S2 对局规则/画板同步/Socket; depends: T3)
-- [ ] T5: 前端骨架与设计系统 — acceptance: Tailwind 落地色板与圆角卡片风格，落地页/登录注册页可完成注册→登录并存 token，路由守卫生效 (covers: S2 视觉方向/REST; depends: T3)
-- [ ] T6: 前端对局页 — acceptance: 三栏布局；创建/加入房间；画板指针事件出笔且经 socket 实时同步到第二客户端；聊天猜词、回合轮换、计时与结算界面完整可玩 (covers: S2 对局规则/画板同步/布局; depends: T4, T5)
-- [ ] T7: 二次元资产与标志性瞬间 — acceptance: 生成并接入预设头像与标题横幅；回合揭示立绘卡、画笔粒子尾迹、猜对花瓣彩带三处效果在浏览器中可见 (covers: S2 视觉方向; depends: T6)
-- [ ] T8: 对局历史与排行 — acceptance: 对局结束分数落库；`/matches/recent`、`/leaderboard` 对应页面展示正确 (covers: S2 REST; depends: T4, T5)
-- [ ] T9: 验证 — acceptance: `npm run build`（web+server）、`npm test -w apps/server`、TypeScript 无错误全部通过；双浏览器手测清单走通（注册→建房→加入→整场对局→历史/排行）(covers: S2 全部; depends: T7, T8)
+- [x] T1: monorepo 脚手架 — acceptance: `apps/web`（Vite+React+TS+Tailwind）与 `apps/server`（NestJS+Prisma）在 npm workspaces 下安装成功，`npm run build -w apps/web`、`npm run build -w apps/server` 均通过 (covers: S2 技术栈)
+- [x] T2: 词库提取与存储仓储 — acceptance: 提取脚本从 Mindustry 中文包生成 `words.json`（BUILDING/UNIT 各 ≥40，LIQUID/ITEM 按源数据上限全量保留，2–6 字过滤），过滤/分类单测通过；仓储接口 + 内存实现完成，启动即加载词库；Prisma schema 已提交（migrate 留待远程库就绪）(covers: S2 词库生成/数据存储; depends: T1)
+- [x] T3: 认证模块 — acceptance: register/login/users-me 三个接口 e2e 通过（含重复用户名、错误密码、401 无 token 用例），JWT 签发与 bcrypt 校验生效（跑在内存仓储上）(covers: S2 REST/数据存储; depends: T2)
+- [x] T4: 房间与对局后端 — acceptance: 房间 REST（创建/快照）e2e 通过；计分纯函数单测通过；Socket 网关实现 join/笔迹转发/猜词判定/回合计时/计分入库全链路，`npm test -w apps/server` 全绿 (covers: S2 对局规则/画板同步/Socket; depends: T3)
+- [x] T5: 前端骨架与设计系统 — acceptance: Tailwind 落地色板与圆角卡片风格，落地页/登录注册页可完成注册→登录并存 token，路由守卫生效 (covers: S2 视觉方向/REST; depends: T3)
+- [x] T6: 前端对局页 — acceptance: 三栏布局；创建/加入房间；画板指针事件出笔且经 socket 实时同步到第二客户端；聊天猜词、回合轮换、计时与结算界面完整可玩 (covers: S2 对局规则/画板同步/布局; depends: T4, T5)
+- [x] T7: 二次元资产与标志性瞬间 — acceptance: 6 个手绘 SVG 头像接入注册/大厅/对局页，落地页 hero 纯 CSS；回合揭示立绘卡（截图证实）、画笔粒子尾迹（粒子层 2323 像素）、猜对花瓣（.gd-petal×22）三处效果均实测可见 (covers: S2 视觉方向; depends: T6)
+- [x] T8: 对局历史与排行 — acceptance: 对局结束分数落库；`/matches/recent`、`/leaderboard` 对应页面展示正确 (covers: S2 REST; depends: T4, T5)
+- [x] T9: 验证 — acceptance: `npm run build`（web+server）、`npm test -w apps/server`、TypeScript 无错误全部通过；双浏览器手测清单走通（注册→建房→加入→整场对局→历史/排行）(covers: S2 全部; depends: T7, T8)
