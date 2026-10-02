@@ -39,7 +39,7 @@ commits:
 - 一次性提取脚本 `apps/server/scripts/extract-words.mjs` 运行后生成受控词库 `apps/server/prisma/words.json` 并提交入库（运行时不再依赖 Mindustry 源码路径）
 - 过滤：取 2–6 个汉字的名词；去重；剔除含数字/字母/标点的条目；类别映射为 `BUILDING | UNIT | LIQUID | ITEM`
 - 难度：字数 2–3 = 1（易），4 = 2（中），5–6 = 3（难）
-- 数量目标：每类 ≥ 40 词（不足时放宽长度到 7 字并人工抽查）
+- 数量目标：BUILDING/UNIT 每类 ≥ 40；LIQUID/ITEM 以源数据为上限（zh_CN 包中 `.name` 仅 11/22 条，剔除单字后无法达标，实际交付 BUILDING 350 / UNIT 58 / LIQUID 10 / ITEM 14，合计 432；长度严格 2–6 字，不放宽）
 - 加载：内存模式启动时读 `words.json` 装入 `WordStore`；Postgres 模式由种子脚本写入 `Word` 表
 
 ### 对局规则
@@ -108,7 +108,7 @@ commits:
 ## Tasks
 
 - [ ] T1: monorepo 脚手架 — acceptance: `apps/web`（Vite+React+TS+Tailwind）与 `apps/server`（NestJS+Prisma）在 npm workspaces 下安装成功，`npm run build -w apps/web`、`npm run build -w apps/server` 均通过 (covers: S2 技术栈)
-- [ ] T2: 词库提取与存储仓储 — acceptance: 提取脚本从 Mindustry 中文包生成 `words.json`（每类 ≥40 词，2–6 字过滤），过滤/分类单测通过；仓储接口 + 内存实现完成，启动即加载词库；Prisma schema 已提交（migrate 留待远程库就绪）(covers: S2 词库生成/数据存储; depends: T1)
+- [ ] T2: 词库提取与存储仓储 — acceptance: 提取脚本从 Mindustry 中文包生成 `words.json`（BUILDING/UNIT 各 ≥40，LIQUID/ITEM 按源数据上限全量保留，2–6 字过滤），过滤/分类单测通过；仓储接口 + 内存实现完成，启动即加载词库；Prisma schema 已提交（migrate 留待远程库就绪）(covers: S2 词库生成/数据存储; depends: T1)
 - [ ] T3: 认证模块 — acceptance: register/login/users-me 三个接口 e2e 通过（含重复用户名、错误密码、401 无 token 用例），JWT 签发与 bcrypt 校验生效（跑在内存仓储上）(covers: S2 REST/数据存储; depends: T2)
 - [ ] T4: 房间与对局后端 — acceptance: 房间 REST（创建/快照）e2e 通过；计分纯函数单测通过；Socket 网关实现 join/笔迹转发/猜词判定/回合计时/计分入库全链路，`npm test -w apps/server` 全绿 (covers: S2 对局规则/画板同步/Socket; depends: T3)
 - [ ] T5: 前端骨架与设计系统 — acceptance: Tailwind 落地色板与圆角卡片风格，落地页/登录注册页可完成注册→登录并存 token，路由守卫生效 (covers: S2 视觉方向/REST; depends: T3)

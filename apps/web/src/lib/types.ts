@@ -1,4 +1,4 @@
-﻿/** 与后端契约对齐的共享类型 + 宽松的载荷归一化（后端字段做防御性兼容）�?*/
+/** 与后端契约对齐的共享类型 + 宽松的载荷归一化（后端字段做防御性兼容） */
 
 export interface User {
   id: string;
@@ -11,7 +11,7 @@ export interface RoomPlayer {
   username: string;
   avatarId?: number | string;
   score: number;
-  /** 本回合是否已猜中（后�?publicPlayer.guessed�?*/
+  /** 本回合是否已猜中（后端 publicPlayer.guessed） */
   guessed?: boolean;
 }
 
@@ -22,11 +22,13 @@ export interface RoomState {
   status?: string;
   roundNo?: number;
   totalRounds?: number;
-  /** 本回合已产生的笔迹（随快照下发，用于中途加�?刷新回放�?*/
+  /** 本回合已产生的笔迹（随快照下发，用于中途加入/刷新回放） */
   strokes: StrokeEvent[];
   drawerId?: string;
-  /** 仅画者可�?*/
+  /** 仅画者可见 */
   word?: string;
+  /** 仅画者可见（词的类别） */
+  category?: string;
   charCount?: number;
   endsAt?: number;
 }
@@ -136,6 +138,7 @@ export function normalizeRoomState(raw: unknown): RoomState {
     strokes,
     drawerId: idOf(o.drawerId) ?? idOf(root.drawerId) ?? undefined,
     word: typeof o.word === 'string' && o.word ? o.word : undefined,
+    category: typeof o.category === 'string' && o.category ? o.category : undefined,
     charCount: typeof charCountRaw === 'number' && Number.isFinite(charCountRaw) ? charCountRaw : undefined,
     endsAt: endsAt ?? undefined,
   };

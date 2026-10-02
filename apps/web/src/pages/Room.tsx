@@ -89,6 +89,8 @@ export default function Room() {
 
   const socketRef = useRef<Socket | null>(null);
   const boardRef = useRef<DrawBoardHandle | null>(null);
+  /** 仅用户主动离房时置位；刷新/关页不发 room:leave，由服务端断线保留玩家与分数 */
+  const leaveIntentRef = useRef(false);
   const playersRef = useRef<RoomPlayer[]>([]);
   const myIdRef = useRef<string | undefined>(undefined);
   const userRef = useRef(user);
@@ -355,7 +357,9 @@ export default function Room() {
     s.on('timer', onTimer);
 
     return () => {
-      s.emit('room:leave');
+      if (leaveIntentRef.current) {
+        s.emit('room:leave');
+      }
       s.disconnect();
       socketRef.current = null;
       setConnected(false);
@@ -450,7 +454,14 @@ export default function Room() {
 
       {/* 顶栏 */}
       <header className="flex flex-wrap items-center gap-3">
-        <Button variant="ghost" className="px-4 py-2 text-sm" onClick={() => navigate('/lobby')}>
+        <Button
+          variant="ghost"
+          className="px-4 py-2 text-sm"
+          onClick={() => {
+            leaveIntentRef.current = true;
+            navigate('/lobby');
+          }}
+        >
           ← 大厅
         </Button>
         <button
@@ -639,7 +650,14 @@ export default function Room() {
               ))}
             </ol>
             <div className="mt-6 flex justify-center gap-3">
-              <Button onClick={() => navigate('/lobby')}>返回大厅</Button>
+              <Button
+                onClick={() => {
+                  leaveIntentRef.current = true;
+                  navigate('/lobby');
+                }}
+              >
+                返回大厅
+              </Button>
               <Button variant="ghost" onClick={() => navigate('/leaderboard')}>
                 查看排行
               </Button>

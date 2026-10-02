@@ -108,6 +108,22 @@ export class GameService {
   }
 
   handleDisconnect(socket: Socket): void {
+    const code = socket.data.roomCode as string | undefined;
+    const user = socket.data.user as HandshakeUser | undefined;
+    const room = code ? this.registry.get(code) : undefined;
+    if (code && room && user && room.status === 'playing') {
+      // 对局中刷新/掉线：保留玩家与分数，等待重连（规格：快照用于刷新恢复）
+      const player = room.players.find(
+        (p) => p.userId === user.sub && p.socketId === socket.id,
+      );
+      if (player) {
+        player.socketId = null;
+        socket.data.roomCode = undefined;
+        socket.leave(code);
+        this.systemChat(room.code, `${player.username} 连接中断，等待重连…`);
+        return;
+      }
+    }
     this.removePlayer(socket, 'disconnect');
   }
 
@@ -205,8 +221,16 @@ export class GameService {
       p.guessed = false;
       p.roundGained = 0;
     }
-    const drawer =
-      room.players[(room.roundNo - 1) % room.players.length];
+    const start = (room.roundNo - 1) % room.players.length;
+    // 画者按加入顺序轮换；跳过当前离线（掉线保留）的玩家
+    let drawer = room.players[start];
+    for (let i = 0; i < room.players.length; i += 1) {
+      const cand = room.players[(start + i) % room.players.length];
+      if (cand.socketId) {
+        drawer = cand;
+        break;
+      }
+    }
     room.drawerId = drawer.userId;
     const word =
       this.words.random(room.usedWordTexts) ?? this.words.random();
@@ -246,7 +270,9 @@ export class GameService {
     socket.emit('round:start', {
       roundNo: room.roundNo,
       drawerId: room.drawerId,
-      ...(isDrawer && room.word ? { word: room.word.text } : {}),
+      ...(isDrawer && room.word
+        ? { word: room.word.text, category: room.word.category }
+        : {}),
       charCount: room.word ? room.word.text.length : 0,
       endsAt: room.endsAt,
     });

@@ -188,28 +188,15 @@ function attemptBuild(
 }
 
 /**
- * 全量流水线：前缀+.name 过滤 → 2–6 字纯汉字过滤 → 跨类别去重；
- * 若任一类别不足 targetPerCategory，放宽到 7 字重跑一次。
+ * 全量流水线：前缀+.name 过滤 → 2–6 字纯汉字过滤 → 跨类别去重。
+ * 长度上限恒为 6（规格约束）；类别不足目标只告警，不放宽长度。
  */
 export function buildWordList(
   entries: Iterable<readonly [string, string]>,
   options: BuildWordListOptions = {},
 ): BuildWordListResult {
   const target = options.targetPerCategory ?? 40;
-  let result = attemptBuild(entries, 6);
-  let maxNameLength = 6;
-  const short = WORD_CATEGORIES.filter((c) => result.counts[c] < target);
-  if (short.length > 0) {
-    const relaxed = attemptBuild(entries, 7);
-    if (
-      WORD_CATEGORIES.every((c) => relaxed.counts[c] >= target) ||
-      Object.values(relaxed.counts).reduce((a, b) => a + b, 0) >
-        Object.values(result.counts).reduce((a, b) => a + b, 0)
-    ) {
-      result = relaxed;
-      maxNameLength = 7;
-    }
-  }
+  const result = attemptBuild(entries, 6);
   const warnings: string[] = [];
   for (const c of WORD_CATEGORIES) {
     if (result.counts[c] < target) {
@@ -218,5 +205,5 @@ export function buildWordList(
       );
     }
   }
-  return { ...result, maxNameLength, warnings };
+  return { ...result, maxNameLength: 6, warnings };
 }

@@ -320,11 +320,6 @@
     "difficulty": 1
   },
   {
-    "text": "损坏的金属地板",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
     "text": "染色地板",
     "category": "BUILDING",
     "difficulty": 2
@@ -720,11 +715,6 @@
     "difficulty": 1
   },
   {
-    "text": "相织布传送带桥",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
     "text": "传送带桥",
     "category": "BUILDING",
     "difficulty": 2
@@ -958,11 +948,6 @@
     "text": "物品管道",
     "category": "BUILDING",
     "difficulty": 2
-  },
-  {
-    "text": "物品管道路由器",
-    "category": "BUILDING",
-    "difficulty": 3
   },
   {
     "text": "物品管道桥",
@@ -1340,11 +1325,6 @@
     "difficulty": 3
   },
   {
-    "text": "小型热量传输机",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
     "text": "热量路由器",
     "category": "BUILDING",
     "difficulty": 3
@@ -1425,11 +1405,6 @@
     "difficulty": 3
   },
   {
-    "text": "大型强化合金墙",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
     "text": "盾墙",
     "category": "BUILDING",
     "difficulty": 1
@@ -1456,11 +1431,6 @@
   },
   {
     "text": "护盾投影器",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
-    "text": "大型护盾投影器",
     "category": "BUILDING",
     "difficulty": 3
   },
@@ -1495,16 +1465,6 @@
     "difficulty": 3
   },
   {
-    "text": "单位物流装载器",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
-    "text": "单位物流卸载点",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
     "text": "强化泵",
     "category": "BUILDING",
     "difficulty": 1
@@ -1515,17 +1475,7 @@
     "difficulty": 2
   },
   {
-    "text": "强化流体交叉器",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
     "text": "强化流体带桥",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
-    "text": "强化流体路由器",
     "category": "BUILDING",
     "difficulty": 3
   },
@@ -1580,17 +1530,7 @@
     "difficulty": 3
   },
   {
-    "text": "高级墙壁粉碎机",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
     "text": "等离子钻机",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
-    "text": "高级等离子钻机",
     "category": "BUILDING",
     "difficulty": 3
   },
@@ -1695,21 +1635,6 @@
     "difficulty": 3
   },
   {
-    "text": "强化载荷传送带",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
-    "text": "强化载荷路由器",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
-    "text": "载荷质量驱动器",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
     "text": "解构器",
     "category": "BUILDING",
     "difficulty": 1
@@ -1750,11 +1675,6 @@
     "difficulty": 3
   },
   {
-    "text": "高级再重构工厂",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
     "text": "单位维修塔",
     "category": "BUILDING",
     "difficulty": 3
@@ -1763,11 +1683,6 @@
     "text": "扩散",
     "category": "BUILDING",
     "difficulty": 1
-  },
-  {
-    "text": "基本装配厂模块",
-    "category": "BUILDING",
-    "difficulty": 3
   },
   {
     "text": "天谴",
@@ -1811,11 +1726,6 @@
   },
   {
     "text": "逻辑显示屏",
-    "category": "BUILDING",
-    "difficulty": 3
-  },
-  {
-    "text": "大型逻辑显示屏",
     "category": "BUILDING",
     "difficulty": 3
   },

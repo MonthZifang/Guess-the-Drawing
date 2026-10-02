@@ -124,17 +124,17 @@ describe('buildWordList', () => {
     expect(counts.ITEM).toBe(1);
   });
 
-  it('任一类别不足目标时放宽到 7 字', () => {
+  it('类别不足目标时仍保持 2–6 字上限，不放宽到 7 字', () => {
     const long: Array<[string, string]> = [
-      ['block.a.name', '七六五四三二一'],
-      ['unit.a.name', '一二三四五六'],
-      ['liquid.a.name', '甲乙丙丁戊己庚'],
-      ['item.a.name', '一二三四五六七'],
+      ['block.a.name', '七六五四三二一'], // 7 字 → 剔除
+      ['unit.a.name', '一二三四五六'], // 6 字 → 保留
+      ['liquid.a.name', '甲乙丙丁戊己庚'], // 7 字 → 剔除
+      ['item.a.name', '一二三四五六七'], // 7 字 → 剔除
     ];
-    const strict = buildWordList(long, { targetPerCategory: 40 });
-    expect(strict.maxNameLength).toBe(7);
-    expect(strict.words).toHaveLength(4);
-    expect(strict.warnings.length).toBeGreaterThan(0);
+    const result = buildWordList(long, { targetPerCategory: 40 });
+    expect(result.maxNameLength).toBe(6);
+    expect(result.words.map((w) => w.text)).toEqual(['一二三四五六']);
+    expect(result.warnings.length).toBeGreaterThan(0);
   });
 
   it('输出确定性顺序（按类别分组），且仅含 text/category/difficulty', () => {

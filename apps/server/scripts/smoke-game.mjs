@@ -2,8 +2,9 @@
 /**
  * Socket 网关冒烟测试（对应规格手测清单的后端全链路）：
  * 握手 JWT 拒绝 → 注册/建房 → 双客户端 join → game:start →
- * round:start（画者有词/其他人只有字数）→ 笔迹转发 → 越权绘画报错 →
- * 错误猜词 → 正确猜词(guess:correct) → 全员猜中触发 round:end。
+ * round:start（画者有词+类别/其他人只有字数）→ 笔迹转发 → 越权绘画报错 →
+ * 错误猜词 → 正确猜词(guess:correct) → 全员猜中触发 round:end →
+ * 回合轮换 → 断线保留（画者/猜词者 close 后重连，分数与玩家列表不丢）。
  * 用法：npm run build -w apps/server && node scripts/smoke-game.mjs
  */
 import { spawn } from 'node:child_process';
@@ -162,7 +163,8 @@ try {
   const roundB = await roundBP;
   check('game:started broadcast', true);
   check('drawer A received word', typeof roundA?.word === 'string' && roundA.word.length >= 2, JSON.stringify(roundA));
-  check('guesser B got charCount only', roundB?.word === undefined && roundB?.charCount === roundA?.word?.length, JSON.stringify(roundB));
+  check('drawer A received category', typeof roundA?.category === 'string' && roundA.category.length > 0, JSON.stringify(roundA));
+  check('guesser B got charCount only', roundB?.word === undefined && roundB?.category === undefined && roundB?.charCount === roundA?.word?.length, JSON.stringify(roundB));
   check('roundNo=1 drawerId=A', roundA?.roundNo === 1 && roundA?.drawerId === regA.data.user.id);
 
   // 笔迹：A 画 → B 收到；B 画 → error
@@ -203,8 +205,58 @@ try {
 
   // 回合间暂停 5s 后进入第 2 回合（轮换画者为 B）
   const round2P = waitEvent(sa, 'round:start', 8000);
+  const roundB2FirstP = waitEvent(sb, 'round:start', 8000);
   const round2 = await round2P;
+  const roundB2First = await roundB2FirstP;
   check('round 2 drawer rotates to B', round2?.roundNo === 2 && round2?.drawerId === regB.data.user.id, JSON.stringify(round2));
+
+  // ---- 断线保留与重连（刷新恢复）----
+  // B 是本回合画者：close 模拟刷新，服务端应保留玩家与分数并广播系统提示
+  const disconnectChatP = waitEvent(sa, 'chat', 6000);
+  sb.close();
+  const disconnectChat = await disconnectChatP;
+  check(
+    'disconnect keeps player with notice',
+    String(disconnectChat?.text).includes('连接中断') && String(disconnectChat?.text).includes('smokeb'),
+    JSON.stringify(disconnectChat),
+  );
+
+  const sb2 = connect(tokenB);
+  await waitEvent(sb2, 'connect');
+  const stateB2P = waitEvent(sb2, 'room:state');
+  const roundB2P = waitEvent(sb2, 'round:start');
+  sb2.emit('room:join', { code });
+  const stateB2 = await stateB2P;
+  const bAfter = stateB2?.players?.find((p) => p.userId === regB.data.user.id);
+  check('B reconnect: both players retained', stateB2?.players?.length === 2, JSON.stringify(stateB2?.players));
+  check('B reconnect: score retained', bAfter?.score === bScore?.total, JSON.stringify(bAfter));
+  check('B reconnect: still playing', stateB2?.status === 'playing', String(stateB2?.status));
+  const roundB2 = await roundB2P;
+  check(
+    'B reconnect (drawer) gets word+category again',
+    roundB2?.word === roundB2First?.word &&
+      typeof roundB2?.word === 'string' &&
+      roundB2?.category === roundB2First?.category &&
+      typeof roundB2?.category === 'string' &&
+      roundB2?.drawerId === regB.data.user.id,
+    JSON.stringify(roundB2),
+  );
+
+  // A（猜词者）同样断线重连：分数与在场状态不丢
+  const disconnectChat2P = waitEvent(sb2, 'chat', 6000);
+  sa.close();
+  const disconnectChat2 = await disconnectChat2P;
+  check('guesser disconnect notice', String(disconnectChat2?.text).includes('连接中断'), JSON.stringify(disconnectChat2));
+
+  const sa2 = connect(tokenA);
+  await waitEvent(sa2, 'connect');
+  const stateA2P = waitEvent(sa2, 'room:state');
+  sa2.emit('room:join', { code });
+  const stateA2 = await stateA2P;
+  const aAfter = stateA2?.players?.find((p) => p.userId === regA.data.user.id);
+  check('A reconnect: both players retained', stateA2?.players?.length === 2, JSON.stringify(stateA2?.players));
+  check('A reconnect: score retained', aAfter?.score === aScore?.total, JSON.stringify(aAfter));
+  check('A reconnect: B still drawer', stateA2?.drawerId === regB.data.user.id, String(stateA2?.drawerId));
 
   console.log(failures.length === 0 ? '\nSMOKE OK' : `\nSMOKE FAILED: ${failures.join(' | ')}`);
   process.exitCode = failures.length === 0 ? 0 : 1;

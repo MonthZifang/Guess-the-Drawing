@@ -32,6 +32,8 @@ export interface RoomSnapshot {
   endsAt: number | null;
   /** 仅当前画者可见 */
   word?: string;
+  /** 仅当前画者可见（词的类别，如 建筑/单位…） */
+  category?: string;
 }
 
 export function roomSnapshot(room: Room, requesterId?: string): RoomSnapshot {
@@ -57,6 +59,7 @@ export function roomSnapshot(room: Room, requesterId?: string): RoomSnapshot {
   };
   if (room.word && requesterId && room.drawerId === requesterId) {
     snap.word = room.word.text;
+    snap.category = room.word.category;
   }
   return snap;
 }
