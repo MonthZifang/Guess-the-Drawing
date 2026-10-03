@@ -141,8 +141,8 @@ export default function Room() {
   const isChain = roomState?.drawRule === 'chain';
   const isGuesser = isChain && !!myId && !!roomState?.guesserId && roomState.guesserId === myId;
   const hasCategory = !!(round?.category || roomState?.promptCategory);
-  /** 链式传题段（非词库原词）：不显示类别、加「上一棒的传题」前缀 */
-  const passedPrompt = isChain && ((roomState?.chainIndex ?? 0) > 0 || !hasCategory);
+  /** 链式传题段（非词库原词）：词库段必有类别，传题段无——以此判定加「上一棒的传题」前缀 */
+  const passedPrompt = isChain && !hasCategory;
 
   const nameOf = useCallback((playerId: string): string => {
     if (playerId && playerId === myIdRef.current) return userRef.current?.username ?? '你';
@@ -620,6 +620,7 @@ export default function Room() {
             players={roomState?.players ?? []}
             hostId={roomState?.hostId}
             drawerId={round?.drawerId}
+            guesserId={round?.guesserId}
             myId={myId}
           />
         </div>

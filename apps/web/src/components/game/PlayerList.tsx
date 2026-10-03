@@ -5,10 +5,12 @@ interface Props {
   players: RoomPlayer[];
   hostId?: string;
   drawerId?: string;
+  /** 链式：本回合指定猜词者 */
+  guesserId?: string;
   myId?: string;
 }
 
-export function PlayerList({ players, hostId, drawerId, myId }: Props) {
+export function PlayerList({ players, hostId, drawerId, guesserId, myId }: Props) {
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-baseline justify-between px-1">
@@ -24,6 +26,7 @@ export function PlayerList({ players, hostId, drawerId, myId }: Props) {
         )}
         {players.map((p) => {
           const isDrawer = !!drawerId && p.id === drawerId;
+          const isGuesser = !!guesserId && p.id === guesserId;
           const isHost = !!hostId && p.id === hostId;
           const isMe = !!myId && p.id === myId;
           return (
@@ -56,6 +59,9 @@ export function PlayerList({ players, hostId, drawerId, myId }: Props) {
                 </div>
                 {isDrawer && (
                   <div className="text-[11px] font-bold text-sakura">★ 当前画者</div>
+                )}
+                {!isDrawer && isGuesser && (
+                  <div className="text-[11px] font-bold text-stella">◆ 指定猜词者</div>
                 )}
                 {!isDrawer && p.guessed && !!drawerId && (
                   <div className="text-[11px] font-bold text-mint">✓ 已猜中</div>

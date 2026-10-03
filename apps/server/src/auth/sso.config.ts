@@ -11,6 +11,8 @@ export interface SsoConfig {
   frontendOrigin: string;
 }
 
+let warnedDevSecret = false;
+
 export function ssoConfig(): SsoConfig {
   const issuer = (process.env.SSO_ISSUER ?? 'http://127.0.0.1:8080').replace(
     /\/+$/,
@@ -19,10 +21,20 @@ export function ssoConfig(): SsoConfig {
   const publicUrl = (
     process.env.SERVER_PUBLIC_URL ?? 'http://127.0.0.1:3001'
   ).replace(/\/+$/, '');
+  const clientSecret = process.env.SSO_CLIENT_SECRET ?? 'devsecret123';
+  if (
+    !warnedDevSecret &&
+    clientSecret === 'devsecret123' &&
+    process.env.NODE_ENV === 'production'
+  ) {
+    warnedDevSecret = true;
+    // eslint-disable-next-line no-console
+    console.warn('[sso] SSO_CLIENT_SECRET 为开发默认值——生产环境必须显式配置');
+  }
   return {
     issuer,
     clientId: process.env.SSO_CLIENT_ID ?? 'guess-draw-anime',
-    clientSecret: process.env.SSO_CLIENT_SECRET ?? 'devsecret123',
+    clientSecret,
     redirectUri: `${publicUrl}/auth/sso/callback`,
     frontendOrigin: (
       process.env.FRONTEND_ORIGIN ?? 'http://127.0.0.1:5175'

@@ -63,8 +63,6 @@ export interface ChainState {
   segUsed: number;
   /** 当前链已完成段（chain:end 下发 segments） */
   segments: ChainSegmentMeta[];
-  /** 全场段历史 */
-  history: ChainSegmentMeta[];
   /** 当前链回放集（每段存入后清画板） */
   replay: ChainReplayEntry[];
   /** 全场词语演化链（词库词 → … → 最终词） */
@@ -116,7 +114,7 @@ export interface Room {
   timer: ReturnType<typeof setInterval> | null;
   /** 回合间暂停句柄 */
   pauseTimer: ReturnType<typeof setTimeout> | null;
-  /** 投票 30s 超时句柄 */
+  /** 投票超时句柄（回放估时 + VOTE_TIMEOUT_MS） */
   voteTimer: ReturnType<typeof setTimeout> | null;
 }
 
@@ -125,8 +123,10 @@ export const DEFAULT_ROUNDS = 6;
 export const ROUND_SECONDS = 80;
 /** 回合结束 → 下一回合开始的暂停时长（规格未定，取 5 秒） */
 export const ROUND_PAUSE_MS = 5000;
-/** 链完成投票超时（规格：30 秒） */
+/** 链完成投票超时（规格：回放播完后再 30 秒） */
 export const VOTE_TIMEOUT_MS = 30000;
+/** 单段回放时长估计——必须与前端 ChainStage.SEG_DURATION 保持一致 */
+export const SEGMENT_REPLAY_MS = 2500;
 /** 邀请码：6 位，32 字字符集（去易混 I/O/0/1） */
 export const ROOM_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const ROOM_CODE_LENGTH = 6;

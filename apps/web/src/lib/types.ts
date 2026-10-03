@@ -39,7 +39,7 @@ export interface RoomState {
   promptCategory?: string;
   /** 链式：本段指定猜词者 */
   guesserId?: string;
-  /** 链式：当前段序（0 起）与链总段数 */
+  /** 链式：当前链序号（1 起，非段序）与链总数 */
   chainIndex?: number;
   chainTotal?: number;
 }
@@ -59,6 +59,11 @@ export interface RoundInfo {
   charCount: number;
   endsAt?: number;
   category?: string;
+  /** 链式：本段指定猜词者（round:start 下发） */
+  guesserId?: string;
+  /** 链式：当前链序号（1 起，非段序）与链总数 */
+  chainIndex?: number;
+  chainTotal?: number;
 }
 
 export interface RoundScore {
@@ -176,6 +181,15 @@ export function normalizeRoundStart(raw: unknown): RoundInfo {
     charCount,
     endsAt: toEpochMs(o.endsAt ?? o.deadline ?? o.endTime),
     category: typeof o.category === 'string' ? o.category : undefined,
+    guesserId: idOf(o.guesserId) ?? undefined,
+    chainIndex:
+      o.chainIndex != null && Number.isFinite(Number(o.chainIndex))
+        ? Number(o.chainIndex)
+        : undefined,
+    chainTotal:
+      o.chainTotal != null && Number.isFinite(Number(o.chainTotal))
+        ? Number(o.chainTotal)
+        : undefined,
   };
 }
 

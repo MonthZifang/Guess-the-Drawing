@@ -14,6 +14,7 @@ import {
   Room,
   RoomPlayer,
   ROUND_PAUSE_MS,
+  SEGMENT_REPLAY_MS,
   Stroke,
   VOTE_TIMEOUT_MS,
 } from '../rooms/room.types';
@@ -121,6 +122,9 @@ export class GameService {
     );
     if (room.status === 'playing' && room.phase === 'round') {
       this.sendRoundStartTo(socket, room);
+    } else if (room.status === 'playing' && room.phase === 'vote' && room.chain) {
+      // 投票/回放期重连：补发 chain:end，否则该玩家无法进舞台投票
+      socket.emit('chain:end', this.chainEndPayload(room.chain));
     }
   }
 
@@ -254,7 +258,6 @@ export class GameService {
         segTotal: Math.min(fullLen, total),
         segUsed: 0,
         segments: [],
-        history: [],
         replay: [],
         trail: [],
         votes: new Map(),
@@ -465,7 +468,6 @@ export class GameService {
         passedText,
       };
       chain.segments.push(meta);
-      chain.history.push(meta);
       chain.replay.push({
         roundNo: room.roundNo,
         strokes: [...room.strokes],
@@ -534,15 +536,21 @@ export class GameService {
     }
     room.phase = 'vote';
     chain.votes = new Map();
-    this.server?.to(room.code).emit('chain:end', {
-      segments: chain.segments,
-      wordTrail: [...chain.trail],
-      replay: chain.replay,
-    });
+    this.server?.to(room.code).emit('chain:end', this.chainEndPayload(chain));
+    // 回放时长 + 30 秒投票窗口：否则大房间（段数≥13）回放未完投票已超时
+    const replayMs = chain.replay.length * SEGMENT_REPLAY_MS;
     room.voteTimer = setTimeout(() => {
       room.voteTimer = null;
       this.finalizeVote(room);
-    }, VOTE_TIMEOUT_MS);
+    }, replayMs + VOTE_TIMEOUT_MS);
+  }
+
+  private chainEndPayload(chain: NonNullable<Room['chain']>) {
+    return {
+      segments: chain.segments,
+      wordTrail: [...chain.trail],
+      replay: chain.replay,
+    };
   }
 
   /** 全员投票（或 30s 超时）→ vote:result → 下一条链（offset+1）或整场结算。 */
@@ -712,6 +720,9 @@ export class GameService {
       }
       // 指定猜词者单次提交：无论是否猜中，末条输入一律传给下一棒作画
       const text = extractText(body);
+      if (!text) {
+        return this.err(socket, '请输入要传递的词');
+      }
       const correct =
         !!text &&
         normalizeGuessText(text) === normalizeGuessText(room.prompt.text);
