@@ -1,6 +1,11 @@
+/**
+ * Auth 基础（e2e）：密码注册/登录已移除；/users/me 守卫与健康检查。
+ * SSO 全链路见 sso.e2e-spec.ts。
+ */
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
+import { JwtService } from '@nestjs/jwt';
 import { AppModule } from '../src/app.module';
 
 describe('Auth (e2e)', () => {
@@ -20,82 +25,26 @@ describe('Auth (e2e)', () => {
     await app.close();
   });
 
-  it('POST /auth/register 注册成功并返回 accessToken 与 user（默认 avatarId=1）', async () => {
+  it('POST /auth/register 返回 404（密码注册已移除）', async () => {
+    await request(http)
+      .post('/auth/register')
+      .send({ username: 'alice', password: 'secret1' })
+      .expect(404);
+  });
+
+  it('POST /auth/login 返回 404（密码登录已移除）', async () => {
+    await request(http)
+      .post('/auth/login')
+      .send({ username: 'alice', password: 'secret1' })
+      .expect(404);
+  });
+
+  it('GET /auth/sso/start 公开（无需 Bearer，302 到 IdP）', async () => {
     const res = await request(http)
-      .post('/auth/register')
-      .send({ username: 'alice', password: 'secret1' })
-      .expect(201);
-    expect(typeof res.body.accessToken).toBe('string');
-    expect(res.body.user).toMatchObject({
-      username: 'alice',
-      avatarId: 1,
-    });
-    expect(typeof res.body.user.id).toBe('string');
-  });
-
-  it('POST /auth/register 重复用户名返回 409', async () => {
-    await request(http)
-      .post('/auth/register')
-      .send({ username: 'alice', password: 'secret1' })
-      .expect(409);
-  });
-
-  it('POST /auth/register 带 avatarId 注册后 users-me 返回该值', async () => {
-    const reg = await request(http)
-      .post('/auth/register')
-      .send({ username: 'bob', password: 'secret1', avatarId: 4 })
-      .expect(201);
-    expect(reg.body.user.avatarId).toBe(4);
-    const me = await request(http)
-      .get('/users/me')
-      .set('Authorization', `Bearer ${reg.body.accessToken}`)
-      .expect(200);
-    expect(me.body).toMatchObject({ username: 'bob', avatarId: 4 });
-  });
-
-  it('POST /auth/register avatarId 越界返回 400', async () => {
-    await request(http)
-      .post('/auth/register')
-      .send({ username: 'badavatar', password: 'secret1', avatarId: 7 })
-      .expect(400);
-    await request(http)
-      .post('/auth/register')
-      .send({ username: 'badavatar0', password: 'secret1', avatarId: 0 })
-      .expect(400);
-  });
-
-  it('POST /auth/register 用户名/密码不合规返回 400', async () => {
-    await request(http)
-      .post('/auth/register')
-      .send({ username: 'ab', password: 'secret1' })
-      .expect(400);
-    await request(http)
-      .post('/auth/register')
-      .send({ username: 'validname', password: '12345' })
-      .expect(400);
-  });
-
-  it('POST /auth/login 登录成功', async () => {
-    const res = await request(http)
-      .post('/auth/login')
-      .send({ username: 'alice', password: 'secret1' })
-      .expect(201);
-    expect(typeof res.body.accessToken).toBe('string');
-    expect(res.body.user.username).toBe('alice');
-  });
-
-  it('POST /auth/login 错误密码返回 401', async () => {
-    await request(http)
-      .post('/auth/login')
-      .send({ username: 'alice', password: 'wrongpass' })
-      .expect(401);
-  });
-
-  it('POST /auth/login 用户不存在返回 401', async () => {
-    await request(http)
-      .post('/auth/login')
-      .send({ username: 'nobody', password: 'secret1' })
-      .expect(401);
+      .get('/auth/sso/start')
+      .redirects(0)
+      .expect(302);
+    expect(String(res.headers.location)).toContain('/oauth2/authorize');
   });
 
   it('GET /users/me 无 token 返回 401', async () => {
@@ -109,17 +58,13 @@ describe('Auth (e2e)', () => {
       .expect(401);
   });
 
-  it('GET /users/me 携带有效 token 返回当前用户', async () => {
-    const login = await request(http)
-      .post('/auth/login')
-      .send({ username: 'alice', password: 'secret1' })
-      .expect(201);
-    const me = await request(http)
+  it('GET /users/me 携带 JwtService 直签 token：用户不存在返回 401', async () => {
+    const jwt = app.get(JwtService);
+    const token = await jwt.signAsync({ sub: 'ghost-user', username: 'ghost' });
+    await request(http)
       .get('/users/me')
-      .set('Authorization', `Bearer ${login.body.accessToken}`)
-      .expect(200);
-    expect(me.body).toMatchObject({ username: 'alice', avatarId: 1 });
-    expect(me.body.passwordHash).toBeUndefined();
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401);
   });
 
   it('GET / 健康检查无需鉴权', async () => {

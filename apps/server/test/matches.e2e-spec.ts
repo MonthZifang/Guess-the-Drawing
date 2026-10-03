@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
+import { JwtService } from '@nestjs/jwt';
 import { AppModule } from '../src/app.module';
 import {
   MATCH_STORE,
@@ -27,12 +28,13 @@ describe('Matches & Leaderboard (e2e)', () => {
     const matches: MatchStore = app.get(MATCH_STORE);
     const ids: string[] = [];
     for (let i = 1; i <= 12; i++) {
-      const u = await users.create({
+      const u = await users.upsertBySso({
+        ssoSub: `seed-user-${i}`,
         username: `player${i}`,
-        passwordHash: 'x',
+        publicId: i,
         avatarId: 1,
       });
-      ids.push(u.id);
+      ids.push(u.user.id);
     }
     const day = 86_400_000;
     // 第 1 场（最早）：player1 得 300
@@ -65,11 +67,9 @@ describe('Matches & Leaderboard (e2e)', () => {
       })),
     });
 
-    const res = await request(http)
-      .post('/auth/register')
-      .send({ username: 'statviewer', password: 'secret1' })
-      .expect(201);
-    token = res.body.accessToken;
+    // 测试令牌由 JwtService 直签（密码注册已移除）
+    const jwt = app.get(JwtService);
+    token = await jwt.signAsync({ sub: 'stat-viewer', username: 'statviewer' });
   });
 
   afterAll(async () => {

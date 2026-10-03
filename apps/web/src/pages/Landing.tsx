@@ -51,12 +51,7 @@ export default function Landing() {
         <span className="font-display text-xl text-sakura">你猜我画·二次元</span>
         <div className="flex gap-3">
           <Link to="/login">
-            <Button variant="ghost" className="py-2">
-              登录
-            </Button>
-          </Link>
-          <Link to="/register">
-            <Button className="py-2">注册</Button>
+            <Button className="py-2">SSO 统一登录</Button>
           </Link>
         </div>
       </header>
@@ -94,13 +89,8 @@ export default function Landing() {
             和朋友开一局蔚蓝档案式清爽画房吧！
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link to="/register">
-              <Button className="px-8 py-3 text-lg">开始游戏 →</Button>
-            </Link>
             <Link to="/login">
-              <Button variant="ghost" className="px-8 py-3 text-lg">
-                已有账号
-              </Button>
+              <Button className="px-8 py-3 text-lg">SSO 统一登录 →</Button>
             </Link>
           </div>
         </div>

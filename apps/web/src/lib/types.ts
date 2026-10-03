@@ -31,6 +31,17 @@ export interface RoomState {
   category?: string;
   charCount?: number;
   endsAt?: number;
+  /** 画板规则（room:state / 快照下发） */
+  drawRule?: 'classic' | 'chain';
+  /** 链式：本段作画题目（含上一棒传题） */
+  prompt?: string;
+  /** 链式：题目的词库类别（仅词库原词段有） */
+  promptCategory?: string;
+  /** 链式：本段指定猜词者 */
+  guesserId?: string;
+  /** 链式：当前段序（0 起）与链总段数 */
+  chainIndex?: number;
+  chainTotal?: number;
 }
 
 export interface StrokeEvent {
@@ -141,6 +152,12 @@ export function normalizeRoomState(raw: unknown): RoomState {
     category: typeof o.category === 'string' && o.category ? o.category : undefined,
     charCount: typeof charCountRaw === 'number' && Number.isFinite(charCountRaw) ? charCountRaw : undefined,
     endsAt: endsAt ?? undefined,
+    drawRule: o.drawRule === 'chain' || o.drawRule === 'classic' ? o.drawRule : undefined,
+    prompt: typeof o.prompt === 'string' && o.prompt ? o.prompt : undefined,
+    promptCategory: typeof o.promptCategory === 'string' && o.promptCategory ? o.promptCategory : undefined,
+    guesserId: idOf(o.guesserId) ?? idOf(root.guesserId) ?? undefined,
+    chainIndex: Number.isFinite(Number(o.chainIndex)) && o.chainIndex != null ? Number(o.chainIndex) : undefined,
+    chainTotal: Number.isFinite(Number(o.chainTotal)) && o.chainTotal != null ? Number(o.chainTotal) : undefined,
   };
 }
 
@@ -265,4 +282,92 @@ export function errorMessage(raw: unknown): string {
   if (Array.isArray(m)) return m.join(' ');
   if (typeof m === 'string' && m) return m;
   return '发生未知错误';
+}
+
+/* ---------- 链式画猜 ---------- */
+
+/** 词语演化链：数组原样；字符串按 → / -> / > 切分 */
+export function normalizeWordTrail(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.map((v) => String(v).trim()).filter(Boolean);
+  if (typeof raw === 'string' && raw.trim()) {
+    return raw
+      .split(/(?:→|->|>)/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+export interface ChainSegment {
+  drawerId: string;
+  guesserId: string;
+  prompt: string;
+  passedText?: string;
+}
+
+export interface ChainReplaySeg {
+  roundNo: number;
+  strokes: StrokeEvent[];
+  prompt: string;
+}
+
+export interface ChainEndData {
+  segments: ChainSegment[];
+  replay: ChainReplaySeg[];
+  wordTrail: string[];
+  /** 本链最后一段的回合号（用于识别下一条链的 room:state） */
+  roundNo: number;
+}
+
+/** chain:end { segments, wordTrail, replay } */
+export function normalizeChainEnd(raw: unknown): ChainEndData {
+  const o = asObj(raw);
+  const replay: ChainReplaySeg[] = (Array.isArray(o.replay) ? o.replay : []).map((r) => {
+    const seg = asObj(r);
+    const strokes = Array.isArray(seg.strokes)
+      ? seg.strokes.map(normalizeStroke).filter((s): s is StrokeEvent => s !== null)
+      : [];
+    return {
+      roundNo: Number(seg.roundNo) || 0,
+      strokes,
+      prompt: typeof seg.prompt === 'string' ? seg.prompt : '',
+    };
+  });
+  const segments: ChainSegment[] = (Array.isArray(o.segments) ? o.segments : []).map((s) => {
+    const seg = asObj(s);
+    return {
+      drawerId: idOf(seg.drawerId) ?? idOf(seg.drawer) ?? '',
+      guesserId: idOf(seg.guesserId) ?? idOf(seg.guesser) ?? '',
+      prompt: typeof seg.prompt === 'string' ? seg.prompt : '',
+      passedText: typeof seg.passedText === 'string' && seg.passedText ? seg.passedText : undefined,
+    };
+  });
+  const roundNos = replay.map((r) => r.roundNo).filter((n) => n > 0);
+  const roundNo = roundNos.length > 0 ? Math.max(...roundNos) : 0;
+  return { segments, replay, wordTrail: normalizeWordTrail(o.wordTrail), roundNo };
+}
+
+/** vote:result { counts } → [完全一样, 有点跑偏, 面目全非] */
+export function normalizeVoteCounts(raw: unknown): [number, number, number] {
+  const out: [number, number, number] = [0, 0, 0];
+  const setAt = (idx: number, n: unknown) => {
+    const v = Number(n);
+    if (idx >= 1 && idx <= 3 && Number.isFinite(v)) out[idx - 1] = v;
+  };
+  if (Array.isArray(raw)) {
+    if (raw.some((x) => x && typeof x === 'object')) {
+      raw.forEach((x) => {
+        const o = asObj(x);
+        setAt(Number(o.choice ?? o.value ?? o.key), o.count ?? o.votes ?? o.n);
+      });
+    } else {
+      raw.forEach((x, i) => setAt(i + 1, x));
+    }
+  } else if (raw && typeof raw === 'object') {
+    for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+      const digits = String(k).match(/\d+/);
+      if (digits) setAt(Number(digits[0]), v);
+    }
+  }
+  return out;
 }

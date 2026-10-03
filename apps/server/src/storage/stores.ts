@@ -4,10 +4,12 @@ export const USER_STORE = 'USER_STORE';
 export const WORD_STORE = 'WORD_STORE';
 export const MATCH_STORE = 'MATCH_STORE';
 
+/** 用户存储模型（SSO 统一登录）：身份主键 = ssoSub，排序键 = publicId（缺省回退 sub）。 */
 export interface UserRecord {
   id: string;
+  ssoSub: string;
   username: string;
-  passwordHash: string;
+  publicId: number | null;
   avatarId: number;
   createdAt: Date;
 }
@@ -15,6 +17,7 @@ export interface UserRecord {
 export interface PublicUser {
   id: string;
   username: string;
+  publicId: number | null;
   avatarId: number;
   createdAt: Date;
 }
@@ -23,19 +26,23 @@ export function toPublicUser(user: UserRecord): PublicUser {
   return {
     id: user.id,
     username: user.username,
+    publicId: user.publicId,
     avatarId: user.avatarId,
     createdAt: user.createdAt,
   };
 }
 
 export interface UserStore {
-  create(input: {
+  /** 按 ssoSub upsert：首次建号，后续刷新 username/publicId（id 与 avatarId 不变）。 */
+  upsertBySso(input: {
+    ssoSub: string;
     username: string;
-    passwordHash: string;
+    publicId: number | null;
     avatarId: number;
-  }): Promise<UserRecord>;
-  findByUsername(username: string): Promise<UserRecord | null>;
+  }): Promise<{ user: UserRecord; created: boolean }>;
+  findBySsoSub(ssoSub: string): Promise<UserRecord | null>;
   findById(id: string): Promise<UserRecord | null>;
+  count(): Promise<number>;
 }
 
 export interface WordRecord {

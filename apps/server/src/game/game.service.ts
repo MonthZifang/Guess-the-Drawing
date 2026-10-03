@@ -10,10 +10,12 @@ import {
 } from '../storage/stores';
 import { normalizeCode, RoomRegistry } from '../rooms/room.registry';
 import {
+  ChainSegmentMeta,
   Room,
   RoomPlayer,
   ROUND_PAUSE_MS,
   Stroke,
+  VOTE_TIMEOUT_MS,
 } from '../rooms/room.types';
 import { roomSnapshot } from '../rooms/rooms.controller';
 import {
@@ -22,10 +24,27 @@ import {
   guesserScore,
   normalizeGuessText,
 } from './scoring';
+import {
+  buildChainOrder,
+  createRotation,
+  nextDrawer,
+  resolveRounds,
+  rotateChain,
+  RotationPlayer,
+} from './rotation';
+import {
+  appendWordTrail,
+  chainPairs,
+  guessRejection,
+  passPrompt,
+  segmentCount,
+} from './chain';
 
 interface HandshakeUser {
   sub: string;
   username: string;
+  avatarId?: number;
+  publicId?: number | null;
 }
 
 @Injectable()
@@ -70,15 +89,17 @@ export class GameService {
       if (profile) {
         player.username = profile.username;
         player.avatarId = profile.avatarId;
+        player.publicId = profile.publicId;
       }
     } else {
       if (room.players.length >= room.maxPlayers) {
-        return this.err(socket, '房间已满（最多 8 人）');
+        return this.err(socket, `房间已满（最多 ${room.maxPlayers} 人）`);
       }
       player = {
         userId: user.sub,
         username: profile?.username ?? user.username,
-        avatarId: profile?.avatarId ?? 1,
+        avatarId: profile?.avatarId ?? user.avatarId ?? 1,
+        publicId: profile?.publicId ?? user.publicId ?? null,
         socketId: socket.id,
         joinedAt: Date.now(),
         score: 0,
@@ -167,6 +188,15 @@ export class GameService {
       void this.endMatch(room, '人数不足，对局提前结束');
       return;
     }
+    // 投票中有人离场：剩余全员已投则立即结算
+    if (
+      room.phase === 'vote' &&
+      room.chain &&
+      room.chain.votes.size >= room.players.length
+    ) {
+      this.finalizeVote(room);
+      return;
+    }
     if (room.phase !== 'round') {
       return; // 回合间暂停：留给下一回合
     }
@@ -202,9 +232,42 @@ export class GameService {
       p.guessed = false;
       p.roundGained = 0;
     }
+    // byPlayers 在 game:start 时按当时人数解析
+    room.totalRounds = resolveRounds(room.roundsSpec, room.players.length);
+    const rotationPlayers: RotationPlayer[] = room.players.map((p) => ({
+      userId: p.userId,
+      publicId: p.publicId,
+    }));
+    room.rotation = createRotation(rotationPlayers, room.orderRule);
+    room.guesserId = null;
+    if (room.drawRule === 'chain') {
+      // 链序开局生成一次；offset+1 换链
+      const order = buildChainOrder(rotationPlayers, room.orderRule);
+      const fullLen = segmentCount(order.length);
+      const total = room.totalRounds;
+      room.chain = {
+        order,
+        offset: 0,
+        chainIndex: 1,
+        chainTotal: Math.max(1, Math.ceil(total / Math.max(1, fullLen))),
+        fullLen,
+        segTotal: Math.min(fullLen, total),
+        segUsed: 0,
+        segments: [],
+        history: [],
+        replay: [],
+        trail: [],
+        votes: new Map(),
+        globalSeg: 0,
+      };
+    } else {
+      room.chain = null;
+    }
     this.server?.to(room.code).emit('game:started', {
-      rounds: room.rounds,
+      rounds: room.totalRounds,
       roundSeconds: room.roundSeconds,
+      drawRule: room.drawRule,
+      orderRule: room.orderRule,
       players: room.players.map(publicPlayer),
     });
     this.startRound(room);
@@ -217,19 +280,41 @@ export class GameService {
     room.roundNo += 1;
     room.phase = 'round';
     room.strokes = [];
+    room.lastGuessInput = null;
     for (const p of room.players) {
       p.guessed = false;
       p.roundGained = 0;
     }
-    const start = (room.roundNo - 1) % room.players.length;
-    // 画者按加入顺序轮换；跳过当前离线（掉线保留）的玩家
-    let drawer = room.players[start];
-    for (let i = 0; i < room.players.length; i += 1) {
-      const cand = room.players[(start + i) % room.players.length];
-      if (cand.socketId) {
-        drawer = cand;
-        break;
+    if (room.drawRule === 'chain' && room.chain) {
+      this.startChainSegment(room);
+    } else {
+      this.startClassicRound(room);
+    }
+  }
+
+  /** classic：rotation 引擎取画者（跳过当前离线玩家），词库抽词。 */
+  private startClassicRound(room: Room): void {
+    room.guesserId = null;
+    let drawer: RoomPlayer | undefined;
+    if (room.rotation) {
+      const n = room.rotation.order.length;
+      for (let i = 0; i < n; i += 1) {
+        const id = nextDrawer(room.rotation);
+        const cand = room.players.find((p) => p.userId === id);
+        if (!cand) {
+          continue;
+        }
+        if (!drawer) {
+          drawer = cand; // 全员离线时的兜底
+        }
+        if (cand.socketId) {
+          drawer = cand;
+          break;
+        }
       }
+    }
+    if (!drawer) {
+      drawer = room.players[0];
     }
     room.drawerId = drawer.userId;
     const word =
@@ -240,18 +325,59 @@ export class GameService {
     }
     room.word = word;
     room.usedWordTexts.add(word.text);
-    room.endsAt = Date.now() + room.roundSeconds * 1000;
+    room.prompt = { text: word.text, category: word.category };
+    this.emitRound(room);
+  }
 
+  /** chain：按链序配对推进段；段 0 取词库词，段 k>0 承接上一段末条输入。 */
+  private startChainSegment(room: Room): void {
+    const chain = room.chain!;
+    const roles = chainPairs(rotateChain(chain.order, chain.offset));
+    const role = roles[chain.segUsed];
+    if (!role) {
+      void this.endMatch(room, '链段异常');
+      return;
+    }
+    room.drawerId = role.drawerId;
+    room.guesserId = role.guesserId;
+    chain.segUsed += 1;
+    const k = chain.globalSeg;
+    chain.globalSeg += 1;
+    if (k === 0) {
+      const word =
+        this.words.random(room.usedWordTexts) ?? this.words.random();
+      if (!word) {
+        void this.endMatch(room, '词库为空');
+        return;
+      }
+      room.word = word;
+      room.usedWordTexts.add(word.text);
+      room.prompt = { text: word.text, category: word.category };
+      chain.trail = [word.text];
+    } else {
+      room.word = null;
+      const carried = chain.trail[chain.trail.length - 1] ?? '';
+      if (!carried) {
+        void this.endMatch(room, '词库为空');
+        return;
+      }
+      room.prompt = { text: carried, category: null };
+    }
+    this.emitRound(room);
+  }
+
+  /** 下发 round:start（画者带题目，chain 全员带指定猜词者与链进度）。 */
+  private emitRound(room: Room): void {
+    room.endsAt = Date.now() + room.roundSeconds * 1000;
     for (const p of room.players) {
       if (!p.socketId) {
         continue;
       }
       const s = this.server?.sockets.get(p.socketId);
       if (s) {
-        this.emitRoundStart(s, room, p.userId === drawer.userId);
+        this.emitRoundStart(s, room, p.userId === room.drawerId);
       }
     }
-
     this.emitTimer(room);
     room.timer = setInterval(() => {
       if (room.phase !== 'round' || !room.endsAt) {
@@ -267,15 +393,24 @@ export class GameService {
   }
 
   private emitRoundStart(socket: Socket, room: Room, isDrawer: boolean): void {
-    socket.emit('round:start', {
+    const payload: Record<string, unknown> = {
       roundNo: room.roundNo,
       drawerId: room.drawerId,
-      ...(isDrawer && room.word
-        ? { word: room.word.text, category: room.word.category }
-        : {}),
-      charCount: room.word ? room.word.text.length : 0,
+      charCount: room.prompt ? room.prompt.text.length : 0,
       endsAt: room.endsAt,
-    });
+    };
+    if (isDrawer && room.prompt) {
+      payload.word = room.prompt.text;
+      if (room.prompt.category) {
+        payload.category = room.prompt.category;
+      }
+    }
+    if (room.drawRule === 'chain') {
+      payload.guesserId = room.guesserId;
+      payload.chainIndex = room.chain?.chainIndex ?? null;
+      payload.chainTotal = room.chain?.chainTotal ?? null;
+    }
+    socket.emit('round:start', payload);
   }
 
   private sendRoundStartTo(socket: Socket, room: Room): void {
@@ -316,9 +451,32 @@ export class GameService {
       drawer.roundGained = gained;
       drawer.score += gained;
     }
+
+    // chain：段收尾 — 传题、wordTrail、段元信息、回放集（每段存入后清画板）
+    let passedText: string | undefined;
+    if (room.drawRule === 'chain' && room.chain && room.prompt) {
+      const chain = room.chain;
+      passedText = passPrompt(room.prompt.text, room.lastGuessInput);
+      const meta: ChainSegmentMeta = {
+        roundNo: room.roundNo,
+        drawerId: room.drawerId ?? '',
+        guesserId: room.guesserId ?? '',
+        prompt: room.prompt.text,
+        passedText,
+      };
+      chain.segments.push(meta);
+      chain.history.push(meta);
+      chain.replay.push({
+        roundNo: room.roundNo,
+        strokes: [...room.strokes],
+        prompt: room.prompt.text,
+      });
+      chain.trail = appendWordTrail(chain.trail, passedText);
+    }
+
     this.server?.to(room.code).emit('round:end', {
       roundNo: room.roundNo,
-      word: room.word?.text ?? null,
+      word: room.prompt?.text ?? null,
       reason,
       scores: room.players.map((p) => ({
         userId: p.userId,
@@ -326,13 +484,87 @@ export class GameService {
         gained: p.roundGained,
         total: p.score,
       })),
+      ...(room.chain && passedText !== undefined
+        ? { passedText, wordTrail: [...room.chain.trail] }
+        : {}),
     });
-    if (room.word) {
-      this.systemChat(room.code, `本回合答案：${room.word.text}`);
+    if (room.prompt) {
+      this.systemChat(room.code, `本回合答案：${room.prompt.text}`);
     }
     room.endsAt = null;
     room.word = null;
+    room.prompt = null;
     room.drawerId = null;
+    room.guesserId = null;
+    room.pauseTimer = setTimeout(() => this.afterRoundPause(room), ROUND_PAUSE_MS);
+  }
+
+  private afterRoundPause(room: Room): void {
+    room.pauseTimer = null;
+    if (room.status !== 'playing') {
+      return;
+    }
+    if (room.players.length < 2) {
+      void this.endMatch(room, '人数不足，对局提前结束');
+      return;
+    }
+    const total = room.totalRounds ?? 0;
+    if (room.drawRule === 'chain' && room.chain) {
+      const chain = room.chain;
+      if (chain.segUsed < chain.segTotal && room.roundNo < total) {
+        this.startRound(room);
+      } else {
+        this.finishChain(room);
+      }
+      return;
+    }
+    if (room.roundNo >= total) {
+      void this.endMatch(room, '全部回合结束');
+    } else {
+      this.startRound(room);
+    }
+  }
+
+  /** 一条链完成 → chain:end（段元信息 + 词语演化链 + 按段回放）→ 投票阶段。 */
+  private finishChain(room: Room): void {
+    const chain = room.chain;
+    if (!chain) {
+      void this.endMatch(room, '全部回合结束');
+      return;
+    }
+    room.phase = 'vote';
+    chain.votes = new Map();
+    this.server?.to(room.code).emit('chain:end', {
+      segments: chain.segments,
+      wordTrail: [...chain.trail],
+      replay: chain.replay,
+    });
+    room.voteTimer = setTimeout(() => {
+      room.voteTimer = null;
+      this.finalizeVote(room);
+    }, VOTE_TIMEOUT_MS);
+  }
+
+  /** 全员投票（或 30s 超时）→ vote:result → 下一条链（offset+1）或整场结算。 */
+  private finalizeVote(room: Room): void {
+    if (room.phase !== 'vote' || !room.chain) {
+      return;
+    }
+    const chain = room.chain;
+    if (room.voteTimer) {
+      clearTimeout(room.voteTimer);
+      room.voteTimer = null;
+    }
+    const counts: Record<string, number> = { 1: 0, 2: 0, 3: 0 };
+    for (const c of chain.votes.values()) {
+      counts[String(c)] += 1;
+    }
+    chain.votes = new Map();
+    this.server?.to(room.code).emit('vote:result', {
+      counts,
+      wordTrail: [...chain.trail],
+    });
+    room.phase = 'pause';
     room.pauseTimer = setTimeout(() => {
       room.pauseTimer = null;
       if (room.status !== 'playing') {
@@ -342,12 +574,31 @@ export class GameService {
         void this.endMatch(room, '人数不足，对局提前结束');
         return;
       }
-      if (room.roundNo >= room.rounds) {
+      const total = room.totalRounds ?? 0;
+      if (room.roundNo >= total) {
         void this.endMatch(room, '全部回合结束');
-      } else {
-        this.startRound(room);
+        return;
       }
+      this.startNextChain(room);
     }, ROUND_PAUSE_MS);
+  }
+
+  private startNextChain(room: Room): void {
+    const chain = room.chain;
+    if (!chain) {
+      void this.endMatch(room, '全部回合结束');
+      return;
+    }
+    chain.offset += 1;
+    chain.chainIndex += 1;
+    chain.segTotal = Math.min(
+      chain.fullLen,
+      (room.totalRounds ?? 0) - room.roundNo,
+    );
+    chain.segUsed = 0;
+    chain.segments = [];
+    chain.replay = [];
+    this.startRound(room);
   }
 
   private async endMatch(room: Room, reason: string): Promise<void> {
@@ -364,6 +615,10 @@ export class GameService {
     if (room.pauseTimer) {
       clearTimeout(room.pauseTimer);
       room.pauseTimer = null;
+    }
+    if (room.voteTimer) {
+      clearTimeout(room.voteTimer);
+      room.voteTimer = null;
     }
     const ranks = computeRanks(
       room.players.map((p) => ({ userId: p.userId, score: p.score })),
@@ -382,7 +637,7 @@ export class GameService {
     try {
       await this.matches.save({
         roomCode: room.code,
-        rounds: room.rounds,
+        rounds: room.totalRounds ?? room.roundNo,
         endedAt: new Date(),
         players: results.map((r) => ({
           userId: r.userId,
@@ -396,7 +651,7 @@ export class GameService {
     }
   }
 
-  // ---------- 画板 / 聊天 / 猜词 ----------
+  // ---------- 画板 / 聊天 / 猜词 / 投票 ----------
 
   handleStroke(socket: Socket, body: unknown): void {
     const room = this.roomOf(socket);
@@ -442,15 +697,47 @@ export class GameService {
     if (room.status !== 'playing') {
       return this.err(socket, '对局尚未开始');
     }
-    if (room.phase !== 'round' || !room.endsAt || !room.word) {
+    if (room.phase !== 'round' || !room.endsAt || !room.prompt) {
       return this.err(socket, '当前不在猜词阶段');
-    }
-    if (room.drawerId === user.sub) {
-      return this.err(socket, '画者不能猜词');
     }
     const player = room.players.find((p) => p.userId === user.sub);
     if (!player) {
       return this.err(socket, '请先加入房间');
+    }
+
+    if (room.drawRule === 'chain') {
+      const reject = guessRejection(room.guesserId, user.sub);
+      if (reject) {
+        return this.err(socket, reject);
+      }
+      // 指定猜词者单次提交：无论是否猜中，末条输入一律传给下一棒作画
+      const text = extractText(body);
+      const correct =
+        !!text &&
+        normalizeGuessText(text) === normalizeGuessText(room.prompt.text);
+      if (correct) {
+        const remaining = Math.max(0, (room.endsAt - Date.now()) / 1000);
+        const gained = guesserScore(remaining, room.roundSeconds);
+        player.guessed = true;
+        player.roundGained = gained;
+        player.score += gained;
+        this.server?.to(room.code).emit('guess:correct', {
+          playerId: player.userId,
+          gained,
+        });
+        this.systemChat(room.code, `${player.username} 猜对了！+${gained} 分`);
+      }
+      room.lastGuessInput = text;
+      this.endRound(
+        room,
+        correct ? '指定玩家猜中' : text ? '未猜中' : '未提交',
+      );
+      return;
+    }
+
+    // classic（行为不变）
+    if (room.drawerId === user.sub) {
+      return this.err(socket, '画者不能猜词');
     }
     if (player.guessed) {
       return this.err(socket, '本轮你已猜中，可继续聊天');
@@ -459,7 +746,9 @@ export class GameService {
     if (!text) {
       return this.err(socket, '请输入猜测内容');
     }
-    if (normalizeGuessText(text) !== normalizeGuessText(room.word.text)) {
+    if (
+      normalizeGuessText(text) !== normalizeGuessText(room.prompt.text)
+    ) {
       socket.emit('chat', {
         playerId: null,
         username: '系统',
@@ -483,6 +772,36 @@ export class GameService {
     );
     if (this.allGuessed(room)) {
       this.endRound(room, '全员猜中');
+    }
+  }
+
+  /** 投票：chain 链完成阶段，每人一次（重复忽略），全员完成或 30s 超时聚合。 */
+  handleVote(socket: Socket, body: unknown): void {
+    const room = this.roomOf(socket);
+    if (!room) {
+      return;
+    }
+    const user = socket.data.user as HandshakeUser;
+    if (
+      room.status !== 'playing' ||
+      room.phase !== 'vote' ||
+      !room.chain
+    ) {
+      return this.err(socket, '当前不在投票阶段');
+    }
+    if (!room.players.some((p) => p.userId === user.sub)) {
+      return this.err(socket, '请先加入房间');
+    }
+    const choice = extractChoice(body);
+    if (!choice) {
+      return this.err(socket, '非法投票选项（choice 取 1|2|3）');
+    }
+    if (room.chain.votes.has(user.sub)) {
+      return; // 每人一次，重复忽略
+    }
+    room.chain.votes.set(user.sub, choice);
+    if (room.chain.votes.size >= room.players.length) {
+      this.finalizeVote(room);
     }
   }
 
@@ -554,6 +873,7 @@ function publicPlayer(p: RoomPlayer) {
     userId: p.userId,
     username: p.username,
     avatarId: p.avatarId,
+    publicId: p.publicId,
     score: p.score,
     guessed: p.guessed,
   };
@@ -577,6 +897,15 @@ function extractText(body: unknown): string {
     return String((body as { text: unknown }).text ?? '').trim();
   }
   return '';
+}
+
+function extractChoice(body: unknown): 1 | 2 | 3 | null {
+  const raw =
+    typeof body === 'object' && body !== null && 'choice' in body
+      ? (body as { choice: unknown }).choice
+      : body;
+  const n = Number(raw);
+  return n === 1 || n === 2 || n === 3 ? n : null;
 }
 
 /** 宽松清洗：坐标夹紧到 [0,1]，颜色/线宽兜底。 */

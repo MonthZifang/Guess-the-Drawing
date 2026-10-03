@@ -18,12 +18,15 @@ enum WordCategory {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  username     String        @unique
-  passwordHash String
-  avatarId     Int           @default(1)
-  createdAt    DateTime      @default(now())
-  players      MatchPlayer[]
+  id       String  @id @default(cuid())
+  // SSO 统一登录：身份主键 = IdP sub
+  ssoSub   String  @unique
+  username String
+  // 对外数字排序键（可空，用户隐藏时为 null）
+  publicId Int?    @unique
+  avatarId Int     @default(1)
+  createdAt DateTime @default(now())
+  players   MatchPlayer[]
 }
 
 model Match {

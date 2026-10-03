@@ -18,7 +18,7 @@ import { UsersController } from './users.controller';
   controllers: [AuthController, UsersController],
   providers: [
     AuthService,
-    // 全局 JWT 守卫：除 @Public()（register/login/health）外均需 Bearer token
+    // 全局 JWT 守卫：除 @Public()（sso/start、sso/callback、health）外均需 Bearer token
     { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
   exports: [AuthService, JwtModule],

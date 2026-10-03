@@ -16,6 +16,8 @@ import { GameService } from './game.service';
 interface HandshakeUser {
   sub: string;
   username: string;
+  avatarId?: number;
+  publicId?: number | null;
 }
 
 /**
@@ -114,6 +116,14 @@ export class GameGateway
     this.game.handleClear(socket);
   }
 
+  @SubscribeMessage('vote:cast')
+  onVoteCast(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: unknown,
+  ): void {
+    this.game.handleVote(socket, body);
+  }
+
   private async verifyHandshake(client: Socket): Promise<HandshakeUser> {
     const auth = (client.handshake.auth ?? {}) as Record<string, unknown>;
     let token =
@@ -127,12 +137,20 @@ export class GameGateway
     if (!token) {
       throw new Error('missing token');
     }
-    const payload = await this.jwt.verifyAsync<{ sub: string; username: string }>(
-      token,
-    );
+    const payload = await this.jwt.verifyAsync<{
+      sub: string;
+      username: string;
+      avatarId?: number;
+      publicId?: number | null;
+    }>(token);
     if (!payload?.sub) {
       throw new Error('invalid payload');
     }
-    return { sub: payload.sub, username: payload.username };
+    return {
+      sub: payload.sub,
+      username: payload.username,
+      avatarId: payload.avatarId,
+      publicId: payload.publicId ?? null,
+    };
   }
 }

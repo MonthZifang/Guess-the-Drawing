@@ -55,8 +55,3 @@ export async function api<T>(path: string, opts: ApiOptions = {}): Promise<T> {
   }
   return data as T;
 }
-
-export interface AuthResponse {
-  accessToken: string;
-  user: { id?: string; username?: string; avatarId?: number | string };
-}

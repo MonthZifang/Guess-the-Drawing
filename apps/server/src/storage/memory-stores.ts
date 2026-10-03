@@ -12,31 +12,43 @@ import type {
 
 export class MemoryUserStore implements UserStore {
   private byId = new Map<string, UserRecord>();
-  private byUsername = new Map<string, UserRecord>();
+  private bySsoSub = new Map<string, UserRecord>();
 
-  async create(input: {
+  async upsertBySso(input: {
+    ssoSub: string;
     username: string;
-    passwordHash: string;
+    publicId: number | null;
     avatarId: number;
-  }): Promise<UserRecord> {
+  }): Promise<{ user: UserRecord; created: boolean }> {
+    const existing = this.bySsoSub.get(input.ssoSub);
+    if (existing) {
+      existing.username = input.username;
+      existing.publicId = input.publicId;
+      return { user: existing, created: false };
+    }
     const user: UserRecord = {
       id: randomUUID(),
+      ssoSub: input.ssoSub,
       username: input.username,
-      passwordHash: input.passwordHash,
+      publicId: input.publicId,
       avatarId: input.avatarId,
       createdAt: new Date(),
     };
     this.byId.set(user.id, user);
-    this.byUsername.set(user.username, user);
-    return user;
+    this.bySsoSub.set(user.ssoSub, user);
+    return { user, created: true };
   }
 
-  async findByUsername(username: string): Promise<UserRecord | null> {
-    return this.byUsername.get(username) ?? null;
+  async findBySsoSub(ssoSub: string): Promise<UserRecord | null> {
+    return this.bySsoSub.get(ssoSub) ?? null;
   }
 
   async findById(id: string): Promise<UserRecord | null> {
     return this.byId.get(id) ?? null;
+  }
+
+  async count(): Promise<number> {
+    return this.byId.size;
   }
 }
 

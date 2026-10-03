@@ -13,9 +13,10 @@ export function PlayerList({ players, hostId, drawerId, myId }: Props) {
     <Card className="p-4">
       <div className="mb-3 flex items-baseline justify-between px-1">
         <h2 className="font-display text-lg text-stella">玩家</h2>
-        <span className="text-xs text-ink/45">{players.length}/8</span>
+        <span className="text-xs text-ink/45">{players.length}/60</span>
       </div>
-      <ul className="space-y-2">
+      {/* 60 人上限：列表容器限高滚动 */}
+      <ul className="gd-scroll max-h-[40vh] space-y-2 overflow-y-auto pr-1">
         {players.length === 0 && (
           <li className="rounded-xl bg-bg px-3 py-4 text-center text-sm text-ink/45">
             等待玩家加入…

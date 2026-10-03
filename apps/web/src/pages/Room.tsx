@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 import { ChatPanel } from '../components/game/ChatPanel';
+import { ChainStage } from '../components/game/ChainStage';
+import type { VoteResultData } from '../components/game/ChainStage';
 import { DrawBoard } from '../components/game/DrawBoard';
 import type { DrawBoardHandle } from '../components/game/DrawBoard';
 import { PetalBurst } from '../components/game/PetalBurst';
@@ -14,6 +16,7 @@ import { api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import {
   errorMessage,
+  normalizeChainEnd,
   normalizeChat,
   normalizeResults,
   normalizeRoomState,
@@ -21,11 +24,22 @@ import {
   normalizeScores,
   normalizeStroke,
   normalizeTimer,
+  normalizeVoteCounts,
+  normalizeWordTrail,
   nextMsgId,
 } from '../lib/types';
-import type { ChatMsg, ResultRow, RoomPlayer, RoomState, RoundInfo, RoundScore, StrokeEvent } from '../lib/types';
+import type {
+  ChainEndData,
+  ChatMsg,
+  ResultRow,
+  RoomPlayer,
+  RoomState,
+  RoundInfo,
+  RoundScore,
+  StrokeEvent,
+} from '../lib/types';
 
-type Phase = 'waiting' | 'playing' | 'roundEnd' | 'gameEnd';
+type Phase = 'waiting' | 'playing' | 'roundEnd' | 'chainEnd' | 'gameEnd';
 
 const PALETTE = [
   { name: '樱粉', hex: '#ff6fa5' },
@@ -80,6 +94,11 @@ export default function Room() {
   const [totalRounds, setTotalRounds] = useState<number | null>(null);
   const [roundScores, setRoundScores] = useState<RoundScore[]>([]);
   const [lastWord, setLastWord] = useState('');
+  const [lastPassedText, setLastPassedText] = useState('');
+  const [lastWordTrail, setLastWordTrail] = useState<string[]>([]);
+  const [chainEnd, setChainEnd] = useState<ChainEndData | null>(null);
+  const [myVote, setMyVote] = useState<1 | 2 | 3 | null>(null);
+  const [voteResult, setVoteResult] = useState<VoteResultData | null>(null);
   const [results, setResults] = useState<ResultRow[]>([]);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [color, setColor] = useState(PALETTE[0].hex);
@@ -97,10 +116,13 @@ export default function Room() {
   const echoesRef = useRef<EchoEntry[]>([]);
   const phaseRef = useRef<Phase>('waiting');
   const roundKeyRef = useRef('');
+  const chainEndRef = useRef<ChainEndData | null>(null);
+  const voteCastRef = useRef<1 | 2 | 3 | null>(null);
 
   playersRef.current = roomState?.players ?? [];
   userRef.current = user;
   phaseRef.current = phase;
+  chainEndRef.current = chainEnd;
 
   const myId = useMemo(() => {
     if (user?.id) {
@@ -116,6 +138,11 @@ export default function Room() {
 
   const isHost = !!myId && !!roomState?.hostId && roomState.hostId === myId;
   const isDrawer = phase === 'playing' && !!round && !!myId && round.drawerId === myId;
+  const isChain = roomState?.drawRule === 'chain';
+  const isGuesser = isChain && !!myId && !!roomState?.guesserId && roomState.guesserId === myId;
+  const hasCategory = !!(round?.category || roomState?.promptCategory);
+  /** 链式传题段（非词库原词）：不显示类别、加「上一棒的传题」前缀 */
+  const passedPrompt = isChain && ((roomState?.chainIndex ?? 0) > 0 || !hasCategory);
 
   const nameOf = useCallback((playerId: string): string => {
     if (playerId && playerId === myIdRef.current) return userRef.current?.username ?? '你';
@@ -146,6 +173,32 @@ export default function Room() {
     );
     if (st.totalRounds) setTotalRounds(st.totalRounds);
 
+    const clearChainStage = () => {
+      chainEndRef.current = null;
+      voteCastRef.current = null;
+      setChainEnd(null);
+      setMyVote(null);
+      setVoteResult(null);
+    };
+
+    // 链回放/投票进行中：仅下一条链的新回合（roundNo 变化）或对局结束才退出舞台
+    if (phaseRef.current === 'chainEnd') {
+      if (st.status === 'finished') {
+        roundKeyRef.current = '';
+        clearChainStage();
+        setPhase('gameEnd');
+        setRemaining(null);
+        return;
+      }
+      const cd = chainEndRef.current;
+      const sameRound = !!cd && st.roundNo != null && st.roundNo === cd.roundNo;
+      if (!(st.status === 'playing' && st.drawerId && !sameRound)) {
+        // 仍是本条链的状态（重连快照等）：只同步玩家/回合数，不打断舞台、不刷画布
+        return;
+      }
+      clearChainStage();
+    }
+
     const board = boardRef.current;
     if (board) {
       board.clear();
@@ -154,6 +207,7 @@ export default function Room() {
 
     if (st.status === 'finished') {
       roundKeyRef.current = '';
+      clearChainStage();
       setPhase('gameEnd');
       setRemaining(null);
       return;
@@ -237,6 +291,11 @@ export default function Room() {
       const n = Number(o.totalRounds ?? o.rounds);
       if (Number.isFinite(n) && n > 0) setTotalRounds(n);
       roundKeyRef.current = '';
+      chainEndRef.current = null;
+      voteCastRef.current = null;
+      setChainEnd(null);
+      setMyVote(null);
+      setVoteResult(null);
       setRound(null);
       setRoundScores([]);
       setResults([]);
@@ -251,6 +310,26 @@ export default function Room() {
         // 新回合：服务端仅清 strokes 数组不广播清空事件，前端在换回合时清画布
         roundKeyRef.current = key;
         boardRef.current?.clear();
+      }
+      // 新回合（含下一条链开局）：退出链舞台，清空上一段传导内容
+      chainEndRef.current = null;
+      voteCastRef.current = null;
+      setChainEnd(null);
+      setMyVote(null);
+      setVoteResult(null);
+      setLastPassedText('');
+      setLastWordTrail([]);
+      // 链式态字段随 round:start 下发时同步进房间状态
+      const o = (data ?? {}) as Record<string, any>;
+      const patch: Partial<RoomState> = {};
+      if (typeof o.guesserId === 'string' && o.guesserId) patch.guesserId = o.guesserId;
+      if (typeof o.prompt === 'string' && o.prompt) patch.prompt = o.prompt;
+      if (typeof o.promptCategory === 'string') patch.promptCategory = o.promptCategory || undefined;
+      if (o.drawRule === 'chain' || o.drawRule === 'classic') patch.drawRule = o.drawRule;
+      if (o.chainIndex != null && Number.isFinite(Number(o.chainIndex))) patch.chainIndex = Number(o.chainIndex);
+      if (o.chainTotal != null && Number.isFinite(Number(o.chainTotal))) patch.chainTotal = Number(o.chainTotal);
+      if (Object.keys(patch).length > 0) {
+        setRoomState((prev) => (prev ? { ...prev, ...patch } : prev));
       }
       setRound(info);
       setPhase('playing');
@@ -309,6 +388,9 @@ export default function Room() {
       const scores = normalizeScores(o.scores ?? data);
       setRoundScores(scores);
       setLastWord(typeof o.word === 'string' ? o.word : '');
+      // 链式：本段传导内容（round:end 带出）
+      setLastPassedText(typeof o.passedText === 'string' ? o.passedText : '');
+      setLastWordTrail(normalizeWordTrail(o.wordTrail));
       // 回合结束公布 total → 精确刷新玩家列表分数（画者抽成等服务端已计入）
       const totals = new Map(scores.filter((s) => s.total != null).map((s) => [s.playerId, s.total as number]));
       if (totals.size > 0) {
@@ -330,8 +412,34 @@ export default function Room() {
     const onGameEnd = (data: unknown) => {
       const o = (data ?? {}) as Record<string, any>;
       setResults(normalizeResults(o.results ?? data));
+      chainEndRef.current = null;
+      voteCastRef.current = null;
+      setChainEnd(null);
+      setMyVote(null);
+      setVoteResult(null);
       setPhase('gameEnd');
       setRemaining(null);
+    };
+
+    /** chain:end { segments, wordTrail, replay } → 进入链回放 + 投票 */
+    const onChainEnd = (data: unknown) => {
+      const parsed = normalizeChainEnd(data);
+      chainEndRef.current = parsed;
+      voteCastRef.current = null;
+      setChainEnd(parsed);
+      setMyVote(null);
+      setVoteResult(null);
+      setRemaining(null);
+      setPhase('chainEnd');
+    };
+
+    /** vote:result { counts, wordTrail } */
+    const onVoteResult = (data: unknown) => {
+      const o = (data ?? {}) as Record<string, any>;
+      setVoteResult({
+        counts: normalizeVoteCounts(o.counts ?? o.votes ?? data),
+        wordTrail: normalizeWordTrail(o.wordTrail),
+      });
     };
 
     const onTimer = (data: unknown) => {
@@ -353,6 +461,8 @@ export default function Room() {
     s.on('guess:correct', onGuessCorrect);
     s.on('chat', onChat);
     s.on('round:end', onRoundEnd);
+    s.on('chain:end', onChainEnd);
+    s.on('vote:result', onVoteResult);
     s.on('game:end', onGameEnd);
     s.on('timer', onTimer);
 
@@ -432,6 +542,17 @@ export default function Room() {
   );
 
   const startGame = useCallback(() => emit('game:start'), [emit]);
+
+  /** 链完成投票（每人一次）：vote:cast { choice } */
+  const castVote = useCallback(
+    (choice: 1 | 2 | 3) => {
+      if (voteCastRef.current != null) return;
+      voteCastRef.current = choice;
+      setMyVote(choice);
+      emit('vote:cast', { choice });
+    },
+    [emit],
+  );
 
   async function copyCode() {
     try {
@@ -548,6 +669,19 @@ export default function Room() {
                   <h3 className="font-display text-2xl text-stella">本回合结束！</h3>
                   <p className="mt-2 text-xs text-ink/50">题目是</p>
                   <p className="font-display text-3xl break-all text-sakura">{lastWord || '—'}</p>
+                  {lastPassedText && (
+                    <p className="mt-2 rounded-xl bg-stella/10 px-3 py-1.5 text-xs font-bold break-all text-stella">
+                      🔗 传给下一棒：{lastPassedText}
+                    </p>
+                  )}
+                  {lastWordTrail.length > 0 && (
+                    <div className="mt-2 rounded-xl bg-bg px-3 py-2 text-left">
+                      <p className="text-[11px] font-bold text-ink/50">词语演化链</p>
+                      <p className="mt-0.5 text-xs break-all text-ink/70">
+                        {lastWordTrail.join(' → ')}
+                      </p>
+                    </div>
+                  )}
                   <ul className="gd-scroll mt-3 max-h-44 space-y-1 overflow-y-auto text-left">
                     {roundScores.length === 0 && (
                       <li className="text-center text-sm text-ink/45">本回合无人猜中</li>
@@ -573,6 +707,17 @@ export default function Room() {
                 </Card>
               </div>
             )}
+
+            {/* 链完成：回放播放器 + 三档投票卡 */}
+            {phase === 'chainEnd' && chainEnd && (
+              <ChainStage
+                boardRef={boardRef}
+                data={chainEnd}
+                myVote={myVote}
+                voteResult={voteResult}
+                onVote={castVote}
+              />
+            )}
           </div>
 
           {/* 状态条 / 回合提示 */}
@@ -592,17 +737,37 @@ export default function Room() {
             <Card className="flex flex-wrap items-center justify-center gap-2 px-4 py-2.5 text-center text-sm">
               {isDrawer ? (
                 <>
+                  {passedPrompt && (
+                    <span className="rounded-full bg-stella/15 px-2.5 py-0.5 text-xs font-bold text-stella">
+                      🔗 上一棒的传题
+                    </span>
+                  )}
                   <span className="text-ink/50">你的题目：</span>
                   <span className="font-display text-lg text-sakura break-all">
-                    {round.word ?? '—'}
+                    {round.word ?? roomState?.prompt ?? '—'}
                   </span>
-                  {round.category && (
+                  {hasCategory && (
                     <span className="rounded-full bg-stella/10 px-2 py-0.5 text-xs text-stella">
-                      {round.category}
+                      {round.category ?? roomState?.promptCategory}
                     </span>
                   )}
                   <span className="text-ink/40">画出来让大家猜！</span>
                 </>
+              ) : isChain ? (
+                isGuesser ? (
+                  <>
+                    <span className="text-ink/50">字数提示：</span>
+                    <span className="font-display text-lg text-stella">{round.charCount} 字</span>
+                    <span className="rounded-full bg-sakura/15 px-2.5 py-0.5 text-xs font-bold text-sakura">
+                      🎯 你来猜 · 答案会传给下一棒
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-ink/50">本回合由指定玩家猜词</span>
+                    <span className="text-ink/40">围观作画，右侧闲聊吧</span>
+                  </>
+                )
               ) : (
                 <>
                   <span className="text-ink/50">字数提示：</span>
@@ -615,10 +780,19 @@ export default function Room() {
           {phase === 'roundEnd' && (
             <p className="text-center text-sm text-ink/50">公布得分中，等待下一回合…</p>
           )}
+          {phase === 'chainEnd' && (
+            <p className="text-center text-sm text-ink/50">本条链已完成，回放与投票进行中…</p>
+          )}
         </div>
 
         <div className="order-3 flex flex-col">
-          <ChatPanel messages={messages} myId={myId} onSend={handleSend} />
+          <ChatPanel
+            messages={messages}
+            myId={myId}
+            onSend={handleSend}
+            canGuess={!isChain || isGuesser}
+            chainHint={isChain && isGuesser ? '你来猜（答案会传给下一棒）' : undefined}
+          />
         </div>
       </div>
 
