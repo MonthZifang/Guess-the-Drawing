@@ -1,14 +1,20 @@
----
+﻿---
 feature: sso-room-rules
-status: in-progress
+status: delivered
 updated: 2026-10-03
 branch: main
-commits:
+commits: 33dabfb..157ab74
 ---
 
 # SSO 统一登录 + 房间规则与链式画猜（60 人）
 
 ## Report
+
+**What was built** — 游戏接入企业 SSO（Go OIDC IdP，本地内存模式常驻 :8080）：授权码+PKCE 全流程（state/nonce/JWKS 校验、按 ssoSub upsert 用户、签发我方 JWT），本地注册与密码登录删除。房间扩容 60 人、邀请码 6 位（32 字符集），开房可配三类规则——画者顺序（按 SSO id 排序 / 每圈洗牌 / 每回合重洗）、画板规则（词库经典 / Draw&Guess 式链式接龙）、回合计法（按人数/固定/自定义）。链式按顺序规则生成链序成对接力（画→猜→传题作画），传题无论猜中与否取猜词者末条输入，链完成自动按段回放笔迹 + 三档投票（回放估时+30 秒窗口）+ 展示词语演化链，两条链后人人画猜各一。前端：SSO 登录页、三组规则表单、60 人滚动列表、链式专属 UI（传题徽标/指定猜词者高亮/回放播放器/投票卡）。
+
+**Verification** — `npm run build` exit 0；`npm test -w apps/server` 77/77（sso.e2e 伪造 IdP、rotation/chain 单测、直签令牌 e2e）；`smoke-game.mjs` 53 项 SMOKE OK；`capacity60.mjs` CAPACITY OK（60 入 61 拒、全员开局、笔迹广播）；`capacity-chain.mjs` CHAIN-CAPACITY OK（26 人 13 段、chain:end 回放、26 票聚合、game:end）；双浏览器真实链路：双账号 SSO 登录 → 6 位码开房（链式+按人数）→ 接龙猜词 → 回放+投票卡（截图 output/t9-vote-card.png）→ 双端 vote:result → 第二链传题 → 再投票 → 结算，21 检查点全过。两轮独立评审：首轮 CHANGES_REQUESTED（C1 大房间回放超投票窗口、2 Major、5 Minor），修复后复审 APPROVE。
+
+**Journey log** — ① 参考游戏锁定为 Steam Draw&Guess（1483870），链序/接龙/回放投票按其接龙模式设计并经用户逐项确认。② websearch 的 Browser Use 基础设施本会话不可用，按例外规则用显式代理抓取用户给的 Steam URL 识别游戏。③ 投票窗口曾是结构性 C1（30s < 回放时长），修复为「回放估时+30s」并以 26 人脚本锚定。④ CLI 浏览器探针屡次错过 30s 投票窗，最终以「单脚本原子化全流程+双端并行」拿到 21 检查点全过。⑤ 期间 Clash 代理核心崩溃导致推送欠账，重启 F:\Clash Verge 恢复；post-commit 钩子在代理故障时告警、恢复后手动补推成功。
 
 ## [S1] Problem
 
@@ -93,9 +99,9 @@ commits:
 
 ## Tasks
 
-- [ ] T1: SSO 本地运行与客户端注册 — acceptance: `sso-server.exe` 内存模式启动于 :8080；`clients.d/guess-draw-anime.json` 就位（env 注入 secret）；`GET /.well-known/openid-configuration` 与授权跳转 302 手测通过 (covers: S2 SSO接入; depends: —)
-- [ ] T2: 后端 SSO 登录与注册移除 — acceptance: start/callback/PKCE/JWKS 校验/用户 upsert/我方 JWT 全链路 e2e 通过（伪造 IdP）；register/login 密码端点移除且返回 404；`sso.e2e-spec` + 既有 rooms/matches e2e（改直签令牌）全绿 (covers: S2 SSO接入/测试边界; depends: T1)
-- [ ] T3: 房间规则与链式引擎（后端）— acceptance: 6 位邀请码、60 人上限、orderRule/drawRule/rounds 入参与快照下发；rotation 三规则 + 链式配对/offset换链/传导/计分/词语链纯函数单测全绿；`chain:end` 回放数据与 `vote:cast/vote:result` 聚合实现；smoke classic 回归 + chain 段（含投票）通过 (covers: S2 房间基础/顺序规则/画板规则/回合计法/Socket增量; depends: T2)
-- [ ] T4: 前端登录与规则 UI — acceptance: 注册页删除、登录页 SSO 按钮走通 `#token=` 回填；开房表单含三组规则选择（含自定义回合输入）；60 人列表可滚动；链式 UI：传题题目栏、指定猜词者高亮与专属输入、非指定者仅闲聊、`x/total` 回合显示；链完成回放播放器（按段播放笔迹）+ 三档投票卡 + 词语演化链展示 (covers: S2 SSO接入前端/房间基础/画板规则; depends: T2, T3)
-- [ ] T5: 验证 — acceptance: `npm run build`、`npm test -w apps/server`、smoke 全绿；双浏览器手测：SSO 登录→开房选规则→链式整圈对局→经典回归→60 人容量压测（脚本模拟） (covers: S2 全部; depends: T4)
-- [ ] T6: 评审 — acceptance: 独立评审对 T1–T5 变更给出 spec compliance / correctness / consistency 三结论，Critical 清零 (covers: S2; depends: T5)
+- [x] T1: SSO 本地运行与客户端注册 — acceptance: `sso-server.exe` 内存模式启动于 :8080；`clients.d/guess-draw-anime.json` 就位（env 注入 secret）；`GET /.well-known/openid-configuration` 与授权跳转 302 手测通过 (covers: S2 SSO接入; depends: —)
+- [x] T2: 后端 SSO 登录与注册移除 — acceptance: start/callback/PKCE/JWKS 校验/用户 upsert/我方 JWT 全链路 e2e 通过（伪造 IdP）；register/login 密码端点移除且返回 404；`sso.e2e-spec` + 既有 rooms/matches e2e（改直签令牌）全绿 (covers: S2 SSO接入/测试边界; depends: T1)
+- [x] T3: 房间规则与链式引擎（后端）— acceptance: 6 位邀请码、60 人上限、orderRule/drawRule/rounds 入参与快照下发；rotation 三规则 + 链式配对/offset换链/传导/计分/词语链纯函数单测全绿；`chain:end` 回放数据与 `vote:cast/vote:result` 聚合实现；smoke classic 回归 + chain 段（含投票）通过 (covers: S2 房间基础/顺序规则/画板规则/回合计法/Socket增量; depends: T2)
+- [x] T4: 前端登录与规则 UI — acceptance: 注册页删除、登录页 SSO 按钮走通 `#token=` 回填；开房表单含三组规则选择（含自定义回合输入）；60 人列表可滚动；链式 UI：传题题目栏、指定猜词者高亮与专属输入、非指定者仅闲聊、`x/total` 回合显示；链完成回放播放器（按段播放笔迹）+ 三档投票卡 + 词语演化链展示 (covers: S2 SSO接入前端/房间基础/画板规则; depends: T2, T3)
+- [x] T5: 验证 — acceptance: `npm run build`、`npm test -w apps/server`、smoke 全绿；双浏览器手测：SSO 登录→开房选规则→链式整圈对局→经典回归→60 人容量压测（脚本模拟） (covers: S2 全部; depends: T4)
+- [x] T6: 评审 — acceptance: 独立评审对 T1–T5 变更给出 spec compliance / correctness / consistency 三结论，Critical 清零 (covers: S2; depends: T5)
